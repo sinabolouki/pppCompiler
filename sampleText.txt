@@ -1,0 +1,13 @@
+function()    main() :integer
+()begin
+
+"this is a string"
+end
+if expr then
+'r'
+
+begin
+end
+else
+begin
+end
