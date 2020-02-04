@@ -1,6 +1,5 @@
 import re
 
-file = open('sampleText.txt')
 
 ID = 'ID'
 AND = 'AND'
