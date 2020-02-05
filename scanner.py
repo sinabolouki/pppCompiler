@@ -22,6 +22,7 @@ END = 'END'
 EOF = 'EOF'
 FUNCTION = 'FUNCTION'
 FALSE = 'FALSE'
+LBRA = 'LBRA'
 LESS = 'LESS'
 LESEQ = 'LESEQ'
 MULTIPLY = 'MULTIPLY'
@@ -36,10 +37,12 @@ PROCEDURE = 'PROCEDURE'
 IF = 'IF'
 INTEGER = 'INTEGER'
 OF = 'OF'
+RBRA = 'RBRA'
 REAL = 'REAL'
 RETURN = 'RETURN'
 RPAR = 'RPAR'
 MINUS = 'MINUS'
+SEMICOLON = 'SEMICOLON'
 STRING = 'STRING'
 STR = 'STR'
 XOR = 'XOR'
@@ -69,6 +72,7 @@ regex_es = [
     (EOF, '^[$]$'),
     (FALSE, '^false$'),
     (FUNCTION, '^function$'),
+    (LBRA, '^[[]$'),
     (LPAR, '^[(]$'),
     (MOD, '^[%]$'),
     (MULTIPLY, '^[*]$'),
@@ -84,8 +88,10 @@ regex_es = [
     (INTEGER, '^integer$'),
     (IF, '^if$'),
     (OF, '^of$'),
+    (RBRA, '^[]]$'),
     (RETURN, '^return$'),
     (REAL, '^real$'),
+    (SEMICOLON, '^[;]$'),
     (STRING, '^string$'),
     (TRUE, '^true$'),
     (WHILE, '^while$'),
@@ -171,10 +177,10 @@ class Scanner:
 
 
 
-scanner = Scanner(file)
-
-while True:
-    token = scanner.parseToken()
-    print(token.type, token.value)
-    if token.type == EOF:
-        break
+# scanner = Scanner(file)
+#
+# while True:
+#     token = scanner.parseToken()
+#     print(token.type, token.value)
+#     if token.type == EOF:
+#         break
