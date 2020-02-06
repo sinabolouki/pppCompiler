@@ -7,7 +7,6 @@ scanner = scanner.Scanner(file)
 parse_table_reader = csv.DictReader(open('parseTable.csv', 'r'), delimiter = ',')
 parse_table_list = []
 for row in parse_table_reader:
-    print(row['REAL'])
     parse_table_list.append(row)
 state = 0
 token = scanner.parseToken()
@@ -17,8 +16,6 @@ parse_stack = []
 def generate_code(func_name):
     if func_name == 'NoSem':
         return
-
-
 
 
 while token.type != 'EOF':

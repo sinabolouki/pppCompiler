@@ -9,6 +9,7 @@ ASSIGN = 'ASSIGN'
 BAND = 'BAND'
 BREAK = 'BREAK'
 BEGIN = 'BEGIN'
+BOOL = 'BOOL'
 BOOLEAN = 'BOOLEAN'
 BOR = 'BOR'
 CHAR = 'CHAR'
@@ -18,19 +19,21 @@ COLON = 'COLON'
 DIVIDE = 'DIVIDE'
 DO = 'DO'
 ELSE = 'ELSE'
+EQ = 'EQ'
 END = 'END'
 EOF = 'EOF'
 FUNCTION = 'FUNCTION'
 FALSE = 'FALSE'
 LBRA = 'LBRA'
-LESS = 'LESS'
-LESEQ = 'LESEQ'
+LES = 'LESS'
+LEQ = 'LESEQ'
 MULTIPLY = 'MULTIPLY'
+NEQ = 'NEQ'
 INT = 'INT'
 REA = 'REA'
 OR = 'OR'
-GREAT = 'GREAT'
-GREQ = 'GREQ'
+GRE = 'GREAT'
+GEQ = 'GREQ'
 LNOT = 'LNOT'
 MOD = 'MOD'
 PROCEDURE = 'PROCEDURE'
@@ -58,6 +61,7 @@ regex_es = [
     (ARRAY, '^array$'),
     (ASSIGN, '^assign$'),
     (BAND, '^[&]$'),
+    (BOOL, '^(true)$|^(false)$'),
     (BOOLEAN, '^boolean$'),
     (BOR, '^[|]$'),
     (BREAK, '^break$'),
@@ -68,6 +72,7 @@ regex_es = [
     (DIVIDE, '^[/]$'),
     (DO, '^do$'),
     (ELSE, '^else$'),
+    (EQ, '^(==)$'),
     (END, '^end$'),
     (EOF, '^[$]$'),
     (FALSE, '^false$'),
@@ -76,11 +81,12 @@ regex_es = [
     (LPAR, '^[(]$'),
     (MOD, '^[%]$'),
     (MULTIPLY, '^[*]$'),
+    (NEQ, '^(<>)$'),
     (OR, '^or$'),
-    (LESS, '^[<]$'),
-    (LESEQ, '^[<=]$'),
-    (GREAT, '^[>]$'),
-    (GREQ, '^[>=]$'),
+    (LES, '^[<]$'),
+    (LEQ, '^[<=]$'),
+    (GRE, '^[>]$'),
+    (GEQ, '^[>=]$'),
     (LNOT, '^[~]$'),
     (MINUS, '^[-]$'),
     (PROCEDURE, '^procedure$'),
