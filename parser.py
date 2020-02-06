@@ -1,4 +1,5 @@
 import scanner
+import codeGen
 import csv
 
 file = open('sampleText.txt')
@@ -11,11 +12,13 @@ for row in parse_table_reader:
 state = 0
 token = scanner.parseToken()
 parse_stack = []
+codeGen = codeGen.CodeGenerator()
 
 
 def generate_code(func_name):
     if func_name == 'NoSem':
         return
+    getattr(codeGen, func_name)(token)
 
 
 while token.type != 'EOF':
@@ -31,7 +34,7 @@ while token.type != 'EOF':
     elif tc_splitted[0] == 'SHIFT':
         next_state = int(str(list(tc_splitted[1])[1:]))
         generate_code(tc_splitted[2])
+        token = scanner.parseToken()
     else:
         print('errror in line filan')
         break
-    token = scanner.parseToken()

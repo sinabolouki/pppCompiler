@@ -9,9 +9,9 @@ class CodeGenerator:
         self.pc = 0
         self.temp_num = 0
 
-    def get_temp (self):
-        temp = 'temp'
-        temp += self.temp_num
+    def get_temp(self):
+        temp = ''
+        temp += str(self.temp_num)
         self.temp_num += 1
         return temp
 
