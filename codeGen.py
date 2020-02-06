@@ -63,7 +63,7 @@ class CodeGenerator:
     def add_simple(self,token):
         second_op_token = self.SS.pop()
         first_op_token = self.SS.pop()
-        self.res_dic[self.pc] = ['%', '=','', '' ,'']
+        self.res_dic[self.pc] = ['%', '=', '', '', '']
         type = self.check_type(first_op_token, second_op_token)
         if type == 'INT':
             self.res_dic[self.pc][2] = 'add i32'
@@ -81,6 +81,76 @@ class CodeGenerator:
         self.ST[temp] = type
         self.res_dic[self.pc][0] += temp
         self.SS.push(temp)
+
+
+    def sub_simple(self,token):
+        second_op_token = self.SS.pop()
+        first_op_token = self.SS.pop()
+        self.res_dic[self.pc] = ['%', '=', '', '', '']
+        type = self.check_type(first_op_token, second_op_token)
+        if type == 'INT':
+            self.res_dic[self.pc][2] = 'sub i32'
+            self.res_dic[self.pc][3] += first_op_token + ', '
+            self.res_dic[self.pc][4] += second_op_token
+        elif type == 'FLOAT':
+            self.res_dic[self.pc][2] = 'fsub float'
+            self.res_dic[self.pc][3] += first_op_token + ', '
+            self.res_dic[self.pc][4] += second_op_token
+        else:
+            # TODO: other types
+            pass
+        temp = self.get_temp()
+        self.ST[temp] = type
+        self.res_dic[self.pc][0] += temp
+        self.SS.push(temp)
+
+
+    def mul_simple(self,token):
+        second_op_token = self.SS.pop()
+        first_op_token = self.SS.pop()
+        self.res_dic[self.pc] = ['%', '=', '', '', '']
+        type = self.check_type(first_op_token, second_op_token)
+        if type == 'INT':
+            self.res_dic[self.pc][2] = 'mul i32'
+            self.res_dic[self.pc][3] += first_op_token + ', '
+            self.res_dic[self.pc][4] += second_op_token
+        elif type == 'FLOAT':
+            self.res_dic[self.pc][2] = 'fmul float'
+            self.res_dic[self.pc][3] += first_op_token + ', '
+            self.res_dic[self.pc][4] += second_op_token
+        else:
+            # TODO: other types
+            pass
+        temp = self.get_temp()
+        self.ST[temp] = type
+        self.res_dic[self.pc][0] += temp
+        self.SS.push(temp)
+
+    def div_simple(self,token):
+        second_op_token = self.SS.pop()
+        first_op_token = self.SS.pop()
+        self.res_dic[self.pc] = ['%', '=', '', '', '']
+        type = self.check_type(first_op_token, second_op_token)
+        if type == 'INT':
+            self.res_dic[self.pc][2] = 'sdiv i32'
+            self.res_dic[self.pc][3] += first_op_token + ', '
+            self.res_dic[self.pc][4] += second_op_token
+        elif type == 'FLOAT':
+            self.res_dic[self.pc][2] = 'fdiv float'
+            self.res_dic[self.pc][3] += first_op_token + ', '
+            self.res_dic[self.pc][4] += second_op_token
+        else:
+            # TODO: other types
+            pass
+        temp = self.get_temp()
+        self.ST[temp] = type
+        self.res_dic[self.pc][0] += temp
+        self.SS.push(temp)
+
+
+
+
+
 
 
     def var_dcl_array (self, id):
