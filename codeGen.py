@@ -137,31 +137,62 @@ class CodeGenerator:
 
     def start_loop(self, token):
         loop_label = self.get_temp()
-        self.res_dic[self.pc] = ["<label>: " + loop_label + ": "]
+        self.res_dic[self.pc] = ['br label %'+loop_label]
+        self.res_dic[self.pc + 1] = [";<label>:" + loop_label + ": "]
         self.SS.append(loop_label)
-        self.pc += 1
+        self.pc += 2
 
     def loop_first_comp(self, token):
         print("loop stack" , self.SS)
         var = self.SS.pop()
         self.res_dic[self.pc] = ['br', 'i1', '%' + var, ', label %', ', label %']
         true_label = self.get_temp()
-        false_label = self.get_temp()
-        self.SS.append(false_label)
+        self.SS.append(self.pc)
         self.pc += 1
-        self.res_dic[self.pc] = ["<label>: " + true_label + ": "]
+        self.res_dic[self.pc] = [";<label>:" + true_label + ": "]
         self.res_dic[self.pc - 1][3] += true_label
-        self.res_dic[self.pc - 1][4] += false_label
         self.pc += 1
 
     def comp_loop(self, token):
         print("Stack: ", self.SS)
-        false_label = self.SS.pop()
+        loop_pc = self.SS.pop()
+        false_label = self.get_temp()
         loop_label = self.SS.pop()
-        self.res_dic[self.pc + 1] = ["<label>: "+false_label + ": "]
+        self.res_dic[self.pc + 1] = [";<label>:"+false_label + ": "]
         self.res_dic[self.pc] = ['br label %' + loop_label]
+        self.res_dic[loop_pc][4] += false_label
         self.pc += 2
 
+
+    # return functions:
+    def return_int(self, token):
+        value = token.value
+        self.res_dic[self.pc] = ['ret i32 ' + value]
+        self.pc += 1
+
+    def return_real(self,token):
+        value = token.value
+        self.res_dic[self.pc] = ['ret float' + value]
+        self.pc += 1
+
+    def return_id(self, token):
+        self.res_dic[self.pc] = ['%', '=load ', '']
+        self.res_dic[self.pc + 1] = ['ret ']
+        temp_var = self.get_temp()
+        self.res_dic[self.pc][0] += temp_var
+        id_name = token.value
+        if self.ST[id_name]['size'] == 'INT':
+            self.res_dic[self.pc][1] += 'i32, '
+            self.res_dic[self.pc][2] += 'i32* %' + id_name
+            self.res_dic[self.pc + 1][0] += 'i32 %' + temp_var
+        elif self.ST[id_name]['size'] == 'REAL':
+            self.res_dic[self.pc][1] += 'float'
+            self.res_dic[self.pc][2] += 'float* %' + id_name
+            self.res_dic[self.pc + 1][0] += 'float %' + temp_var
+        else:
+            pass
+            #TODO
+        self.pc += 2
 
 
     #declaration functions:
@@ -302,14 +333,14 @@ class CodeGenerator:
         print(first_op_token, second_op_token)
         print(self.res_dic)
         temp_var = self.get_temp()
-        self.res_dic[self.pc] = ['%', '=', '', '', '']
+        self.res_dic[self.pc] = ['%', '=', '', '', ', ']
         type = self.check_type(first_op_token, second_op_token)
         self.res_dic[self.pc][0] += temp_var
         self.ST[temp_var] = self.make_stdscp(None, 'temp', 'BOOL')
         if type == 'INT':
-            self.res_dic[self.pc][2] = 'icmp slt i1'
+            self.res_dic[self.pc][2] = 'icmp slt i32'
             self.res_dic[self.pc][3] = '%' + first_op_token
-            self.res_dic[self.pc][4] = '%' + second_op_token
+            self.res_dic[self.pc][4] += '%' + second_op_token
         self.SS.append(temp_var)
         self.pc += 1
 
@@ -322,10 +353,29 @@ class CodeGenerator:
         return dcsp
 
     def define_func(self, token):
-        self.res_dic[self.pc] = ['define ', '@', '( ', '): ']
+        self.res_dic[self.pc] = ['define ', '@', '( ', ') {']
         func_name = token.value
+        self.res_dic[self.pc][1] += func_name
         self.ST[func_name] = self.make_fdcsp()
 
     def set_type(self, token):
+        function_name = self.res_dic[self.pc][1][1:]
         type = self.SS.pop()
-        self.res_dic[self.pc][0]
+        if type == 'INTEGER':
+            self.res_dic[self.pc][0] += 'i32'
+            self.ST[function_name]['size'] = 'INT'
+        elif type == 'CHAR':
+            self.res_dic[self.pc][0] += 'i8'
+            self.ST[function_name]['size'] = 'CHAR'
+        elif type == 'REAL':
+            self.res_dic[self.pc][0] += 'float'
+            self.ST[function_name]['size'] = 'REAL'
+        elif type == 'STRING':
+            # TODO
+            pass
+        self.pc += 1
+
+    def end_func(self, token):
+        print('called')
+        self.res_dic[self.pc] = ['}']
+        self.pc += 1
