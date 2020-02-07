@@ -242,10 +242,13 @@ class CodeGenerator:
         else:
             # TODO: other types
             pass
+
         temp = self.get_temp()
-        self.ST[temp] = type
+        self.ST[temp] = self.make_stdscp(None, 'temp', type)
         self.res_dic[self.pc][0] += temp
         self.SS.append(temp)
+        self.pc += 1
+
 
     def mul(self, token):
         second_op_token = self.SS.pop()
@@ -264,9 +267,10 @@ class CodeGenerator:
             # TODO: other types
             pass
         temp = self.get_temp()
-        self.ST[temp] = type
+        self.ST[temp] = self.make_stdscp(None, 'temp', type)
         self.res_dic[self.pc][0] += temp
         self.SS.append(temp)
+        self.pc += 1
 
     def div(self, token):
         second_op_token = self.SS.pop()
@@ -285,9 +289,11 @@ class CodeGenerator:
             # TODO: other types
             pass
         temp = self.get_temp()
-        self.ST[temp] = type
+        self.ST[temp] = self.make_stdscp(None, 'temp', type)
         self.res_dic[self.pc][0] += temp
         self.SS.append(temp)
+        self.pc += 1
+
 
     def les(self, token):
         print("les stack: ", self.SS)
