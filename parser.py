@@ -5,7 +5,7 @@ import csv
 file = open('sampleText.txt')
 
 scanner = sc.Scanner(file)
-parse_table_reader = csv.DictReader(open('feb71634.csv', 'r'), delimiter = ',')
+parse_table_reader = csv.DictReader(open('feb72130.csv', 'r'), delimiter = ',')
 parse_table_list = []
 for row in parse_table_reader:
     parse_table_list.append(row)
@@ -26,7 +26,7 @@ def generate_code(func_name, token):
 
 
 while token.type != 'EOF':
-    print(token.type, token.value)
+    # print(token.type, token.value)
     table_cell = parse_table_list[state][token.type]
     tc_splitted = table_cell.split()
     if tc_splitted[0] == 'REDUCE':
@@ -36,7 +36,7 @@ while token.type != 'EOF':
         goto = parse_table_list[state][graph_name]
         tc_splitted = goto.split()
         if tc_splitted[0] == 'GOTO':
-            print(tc_splitted)
+            # print(tc_splitted)
             state = int("".join(list(tc_splitted[1])[1:]))
             generate_code(tc_splitted[2], token)
         else:
@@ -44,7 +44,7 @@ while token.type != 'EOF':
 
     elif tc_splitted[0] == 'PUSH_GOTO':
         PS.append(state)
-        print(tc_splitted)
+        # print(tc_splitted)
         state = int("".join(list(tc_splitted[1])[1:]))
         generate_code(tc_splitted[2], token)
     elif tc_splitted[0] == 'SHIFT':
@@ -63,4 +63,4 @@ for i in range(0, codeGen.pc):
     res_text += " ".join(res_dic[i])
     res_text += '\n'
 print(res_text)
-# print(res_dic)
+print(codeGen.SS)

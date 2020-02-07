@@ -14,6 +14,22 @@ class CodeGenerator:
         self.temp_num += 1
         return temp
 
+
+
+    def make_stdscp(self, value, type, size, string_size=None):
+        dscp = {}
+        dscp['value'] = value
+        dscp['type'] = type
+        dscp['size'] = size
+        if size == 'STRING':
+            dscp['string_size'] = string_size
+        return dscp
+
+    def pop_var(self, token):
+        self.SS.pop()
+
+
+
     def push_new_id(self, token):
         # self.ST[token.value] = {}
         self.SS.append(token.value)
@@ -35,18 +51,25 @@ class CodeGenerator:
 
 
     def assign_simple(self,token):
-        var_name = self.SS.pop()
-        res_name = self.SS[-1]
-        type = check
+        pass
+        # var_name = self.SS.pop()
+        # res_name = self.SS[-1]
+        # type = check
 
-    def make_stdscp(self, value, type, size, string_size=None):
-        dscp = {}
-        dscp['value'] = value
-        dscp['type'] = type
-        dscp['size'] = size
-        if size == 'STRING':
-            dscp['string_size'] = string_size
-        return dscp
+    def dcl_assign(self, token):
+        expr_res = self.SS.pop()
+        ass_var = self.SS[-1]
+        self.res_dic[self.pc] = ['store ', '', ', ']
+        print('vars: ', expr_res, ass_var)
+        print('ss: ', self.ST)
+        type = self.check_type(expr_res, ass_var)
+        if type == 'INT':
+            self.res_dic[self.pc][0] += 'i32'
+            self.res_dic[self.pc][2] += 'i32* '
+            self.res_dic[self.pc][1] += '%' + expr_res
+            self.res_dic[self.pc][2] += '%' + ass_var
+        # TODO: rest of types
+        self.pc += 1
 
     def assign(self, token):
         expr_res = self.SS.pop()
@@ -108,6 +131,10 @@ class CodeGenerator:
         self.SS.append(self.pc - 1)
         self.pc += 1
 
+
+
+    # loop functions:
+
     def start_loop(self, token):
         loop_label = self.get_temp()
         self.res_dic[self.pc] = ["<label>: " + loop_label + ": "]
@@ -134,6 +161,10 @@ class CodeGenerator:
         self.res_dic[self.pc + 1] = ["<label>: "+false_label + ": "]
         self.res_dic[self.pc] = ['br label %' + loop_label]
         self.pc += 2
+
+
+
+    #declaration functions:
 
     def push_type(self, token):
         self.SS.append(token.type)
@@ -263,7 +294,6 @@ class CodeGenerator:
         self.SS.append(temp)
         self.pc += 1
 
-    # -------- Comparing Commands ---
 
     def les(self, token):
         print("les stack: ", self.SS)
@@ -277,118 +307,25 @@ class CodeGenerator:
         self.res_dic[self.pc][0] += temp_var
         self.ST[temp_var] = self.make_stdscp(None, 'temp', 'BOOL')
         if type == 'INT':
-            self.res_dic[self.pc][2] = 'icmp slt i32'
-            self.res_dic[self.pc][3] = '%' + first_op_token
-            self.res_dic[self.pc][4] = '%' + second_op_token
-        if type == 'FLOAT':
-            self.res_dic[self.pc][2] = 'fcmp olt'
+            self.res_dic[self.pc][2] = 'icmp slt i1'
             self.res_dic[self.pc][3] = '%' + first_op_token
             self.res_dic[self.pc][4] = '%' + second_op_token
         self.SS.append(temp_var)
         self.pc += 1
 
+    # function declaration functions
+    def make_fdcsp(self):
+        dcsp = {}
+        dcsp['type'] = 'func'
+        dcsp['size'] = None
+        dcsp['vars'] = []
+        return dcsp
 
-    def greater(self, token):
-        first_op_token = self.SS.pop()
-        second_op_token = self.SS.pop()
-        temp_var = self.get_temp()
-        self.res_dic[self.pc] = ['%', '=', '', '', '']
-        type = self.check_type(first_op_token, second_op_token)
-        self.res_dic[self.pc][0] += temp_var
-        self.ST[temp_var] = self.make_stdscp(None, 'temp', 'BOOL')
-        if type == 'INT':
-            self.res_dic[self.pc][2] = 'icmp sgt i32'
-            self.res_dic[self.pc][3] = '%' + first_op_token
-            self.res_dic[self.pc][4] = '%' + second_op_token
-        if type == 'FLOAT':
-            self.res_dic[self.pc][2] = 'fcmp ogt'
-            self.res_dic[self.pc][3] = '%' + first_op_token
-            self.res_dic[self.pc][4] = '%' + second_op_token
-        self.SS.append(temp_var)
-        self.pc += 1
+    def define_func(self, token):
+        self.res_dic[self.pc] = ['define ', '@', '( ', '): ']
+        func_name = token.value
+        self.ST[func_name] = self.make_fdcsp()
 
-
-    def is_equal(self, token):
-        first_op_token = self.SS.pop()
-        second_op_token = self.SS.pop()
-        temp_var = self.get_temp()
-        self.res_dic[self.pc] = ['%', '=', '', '', '']
-        type = self.check_type(first_op_token, second_op_token)
-        self.res_dic[self.pc][0] += temp_var
-        self.ST[temp_var] = self.make_stdscp(None, 'temp', 'BOOL')
-        if type == 'INT':
-            self.res_dic[self.pc][2] = 'icmp eq i32'
-            self.res_dic[self.pc][3] = '%' + first_op_token
-            self.res_dic[self.pc][4] = '%' + second_op_token
-        if type == 'FLOAT':
-            self.res_dic[self.pc][2] = 'fcmp oeq'
-            self.res_dic[self.pc][3] = '%' + first_op_token
-            self.res_dic[self.pc][4] = '%' + second_op_token
-        self.SS.append(temp_var)
-        self.pc += 1
-
-
-    def isnot_equal(self, token):
-        first_op_token = self.SS.pop()
-        second_op_token = self.SS.pop()
-        temp_var = self.get_temp()
-        self.res_dic[self.pc] = ['%', '=', '', '', '']
-        type = self.check_type(first_op_token, second_op_token)
-        self.res_dic[self.pc][0] += temp_var
-        self.ST[temp_var] = self.make_stdscp(None, 'temp', 'BOOL')
-        if type == 'INT':
-            self.res_dic[self.pc][2] = 'icmp ne i32'
-            self.res_dic[self.pc][3] = '%' + first_op_token
-            self.res_dic[self.pc][4] = '%' + second_op_token
-        if type == 'FLOAT':
-            self.res_dic[self.pc][2] = 'fcmp one'
-            self.res_dic[self.pc][3] = '%' + first_op_token
-            self.res_dic[self.pc][4] = '%' + second_op_token
-        self.SS.append(temp_var)
-        self.pc += 1
-
-
-    def less_equal(self, token):
-        first_op_token = self.SS.pop()
-        second_op_token = self.SS.pop()
-        temp_var = self.get_temp()
-        self.res_dic[self.pc] = ['%', '=', '', '', '']
-        type = self.check_type(first_op_token, second_op_token)
-        self.res_dic[self.pc][0] += temp_var
-        self.ST[temp_var] = self.make_stdscp(None, 'temp', 'BOOL')
-        if type == 'INT':
-            self.res_dic[self.pc][2] = 'icmp sle i32'
-            self.res_dic[self.pc][3] = '%' + first_op_token
-            self.res_dic[self.pc][4] = '%' + second_op_token
-        if type == 'FLOAT':
-            self.res_dic[self.pc][2] = 'fcmp ole'
-            self.res_dic[self.pc][3] = '%' + first_op_token
-            self.res_dic[self.pc][4] = '%' + second_op_token
-        self.SS.append(temp_var)
-        self.pc += 1
-
-
-    def greater_equal(self, token):
-        first_op_token = self.SS.pop()
-        second_op_token = self.SS.pop()
-        temp_var = self.get_temp()
-        self.res_dic[self.pc] = ['%', '=', '', '', '']
-        type = self.check_type(first_op_token, second_op_token)
-        self.res_dic[self.pc][0] += temp_var
-        self.ST[temp_var] = self.make_stdscp(None, 'temp', 'BOOL')
-        if type == 'INT':
-            self.res_dic[self.pc][2] = 'icmp sge i32'
-            self.res_dic[self.pc][3] = '%' + first_op_token
-            self.res_dic[self.pc][4] = '%' + second_op_token
-        if type == 'FLOAT':
-            self.res_dic[self.pc][2] = 'fcmp oge'
-            self.res_dic[self.pc][3] = '%' + first_op_token
-            self.res_dic[self.pc][4] = '%' + second_op_token
-        self.SS.append(temp_var)
-        self.pc += 1
-
-    # ---- End of comparing commands ---
-
-    def var_dcl_array(self, id):
-        self.res_dic[self.pc] = []
-        pass
+    def set_type(self, token):
+        type = self.SS.pop()
+        self.res_dic[self.pc][0]

@@ -4,8 +4,7 @@ function main() : integer
 begin
     
 
-    index : integer;
-    index := 4;
+    index : integer := 4;
     while index < 10 do 
     begin
         index := index + 1;
@@ -13,5 +12,5 @@ begin
 
     
 
-    return 0 ;
+    return index ;
 end 
