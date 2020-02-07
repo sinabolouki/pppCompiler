@@ -263,6 +263,7 @@ class CodeGenerator:
         self.SS.append(temp)
         self.pc += 1
 
+    # -------- Comparing Commands ---
 
     def les(self, token):
         print("les stack: ", self.SS)
@@ -276,11 +277,117 @@ class CodeGenerator:
         self.res_dic[self.pc][0] += temp_var
         self.ST[temp_var] = self.make_stdscp(None, 'temp', 'BOOL')
         if type == 'INT':
-            self.res_dic[self.pc][2] = 'icmp slt i1'
+            self.res_dic[self.pc][2] = 'icmp slt i32'
+            self.res_dic[self.pc][3] = '%' + first_op_token
+            self.res_dic[self.pc][4] = '%' + second_op_token
+        if type == 'FLOAT':
+            self.res_dic[self.pc][2] = 'fcmp olt'
             self.res_dic[self.pc][3] = '%' + first_op_token
             self.res_dic[self.pc][4] = '%' + second_op_token
         self.SS.append(temp_var)
         self.pc += 1
+
+
+    def greater(self, token):
+        first_op_token = self.SS.pop()
+        second_op_token = self.SS.pop()
+        temp_var = self.get_temp()
+        self.res_dic[self.pc] = ['%', '=', '', '', '']
+        type = self.check_type(first_op_token, second_op_token)
+        self.res_dic[self.pc][0] += temp_var
+        self.ST[temp_var] = self.make_stdscp(None, 'temp', 'BOOL')
+        if type == 'INT':
+            self.res_dic[self.pc][2] = 'icmp sgt i32'
+            self.res_dic[self.pc][3] = '%' + first_op_token
+            self.res_dic[self.pc][4] = '%' + second_op_token
+        if type == 'FLOAT':
+            self.res_dic[self.pc][2] = 'fcmp ogt'
+            self.res_dic[self.pc][3] = '%' + first_op_token
+            self.res_dic[self.pc][4] = '%' + second_op_token
+        self.SS.append(temp_var)
+        self.pc += 1
+
+
+    def is_equal(self, token):
+        first_op_token = self.SS.pop()
+        second_op_token = self.SS.pop()
+        temp_var = self.get_temp()
+        self.res_dic[self.pc] = ['%', '=', '', '', '']
+        type = self.check_type(first_op_token, second_op_token)
+        self.res_dic[self.pc][0] += temp_var
+        self.ST[temp_var] = self.make_stdscp(None, 'temp', 'BOOL')
+        if type == 'INT':
+            self.res_dic[self.pc][2] = 'icmp eq i32'
+            self.res_dic[self.pc][3] = '%' + first_op_token
+            self.res_dic[self.pc][4] = '%' + second_op_token
+        if type == 'FLOAT':
+            self.res_dic[self.pc][2] = 'fcmp oeq'
+            self.res_dic[self.pc][3] = '%' + first_op_token
+            self.res_dic[self.pc][4] = '%' + second_op_token
+        self.SS.append(temp_var)
+        self.pc += 1
+
+
+    def isnot_equal(self, token):
+        first_op_token = self.SS.pop()
+        second_op_token = self.SS.pop()
+        temp_var = self.get_temp()
+        self.res_dic[self.pc] = ['%', '=', '', '', '']
+        type = self.check_type(first_op_token, second_op_token)
+        self.res_dic[self.pc][0] += temp_var
+        self.ST[temp_var] = self.make_stdscp(None, 'temp', 'BOOL')
+        if type == 'INT':
+            self.res_dic[self.pc][2] = 'icmp ne i32'
+            self.res_dic[self.pc][3] = '%' + first_op_token
+            self.res_dic[self.pc][4] = '%' + second_op_token
+        if type == 'FLOAT':
+            self.res_dic[self.pc][2] = 'fcmp one'
+            self.res_dic[self.pc][3] = '%' + first_op_token
+            self.res_dic[self.pc][4] = '%' + second_op_token
+        self.SS.append(temp_var)
+        self.pc += 1
+
+
+    def less_equal(self, token):
+        first_op_token = self.SS.pop()
+        second_op_token = self.SS.pop()
+        temp_var = self.get_temp()
+        self.res_dic[self.pc] = ['%', '=', '', '', '']
+        type = self.check_type(first_op_token, second_op_token)
+        self.res_dic[self.pc][0] += temp_var
+        self.ST[temp_var] = self.make_stdscp(None, 'temp', 'BOOL')
+        if type == 'INT':
+            self.res_dic[self.pc][2] = 'icmp sle i32'
+            self.res_dic[self.pc][3] = '%' + first_op_token
+            self.res_dic[self.pc][4] = '%' + second_op_token
+        if type == 'FLOAT':
+            self.res_dic[self.pc][2] = 'fcmp ole'
+            self.res_dic[self.pc][3] = '%' + first_op_token
+            self.res_dic[self.pc][4] = '%' + second_op_token
+        self.SS.append(temp_var)
+        self.pc += 1
+
+
+    def greater_equal(self, token):
+        first_op_token = self.SS.pop()
+        second_op_token = self.SS.pop()
+        temp_var = self.get_temp()
+        self.res_dic[self.pc] = ['%', '=', '', '', '']
+        type = self.check_type(first_op_token, second_op_token)
+        self.res_dic[self.pc][0] += temp_var
+        self.ST[temp_var] = self.make_stdscp(None, 'temp', 'BOOL')
+        if type == 'INT':
+            self.res_dic[self.pc][2] = 'icmp sge i32'
+            self.res_dic[self.pc][3] = '%' + first_op_token
+            self.res_dic[self.pc][4] = '%' + second_op_token
+        if type == 'FLOAT':
+            self.res_dic[self.pc][2] = 'fcmp oge'
+            self.res_dic[self.pc][3] = '%' + first_op_token
+            self.res_dic[self.pc][4] = '%' + second_op_token
+        self.SS.append(temp_var)
+        self.pc += 1
+
+    # ---- End of comparing commands ---
 
     def var_dcl_array(self, id):
         self.res_dic[self.pc] = []
