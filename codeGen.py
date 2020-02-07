@@ -14,9 +14,21 @@ class CodeGenerator:
         self.temp_num += 1
         return temp
 
+    def push_new_id(self, token):
+        self.ST[token.value] = {}
+        self.SS.append(token.value)
 
     def push_id(self, token):
-        self.SS.append(token)
+        if token.value in self.ST:
+            self.SS.append(token.value)
+        else:
+            print('error :', token.value,'not declared')
+
+
+    def assign_simple(selfs,token):
+        var_name = self.SS.pop()
+        res_name = self.SS[-1]
+        type = check
 
     def make_stdscp(self, value,type, size, string_size=None):
         dscp = {}
@@ -83,16 +95,18 @@ class CodeGenerator:
         self.pc += 2
 
     def var_dcl_simple(self, token):
-        id_token = self.SS.pop()
-        self.res_dic[self.pc] = ['%', '=', 'alloca', '']
+        id_token = self.SS[-1]
+        temp_pointer = self.get_temp()
+        self.res_dic[self.pc] = ['%'+temp_pointer, '=', 'alloca', '']
+        self.res_dic[self.pc + 1] = ['%' + id_token , '= load', '']
         self.res_dic[self.pc][0] += id_token.value
         type = token.type
         if type == 'INTEGER':
             self.res_dic[self.pc][3] += 'i32'
-            self.ST[self.res_dic[self.pc][0][1:]] = ('INT')
+            self.ST[id_token]['size'] = 'INT'
         elif type == 'CHAR':
             self.res_dic[self.pc][3] += 'i8'
-            self.ST[self.res_dic[self.pc][0][1:]] = ('CHAR')
+            self.St[id_token]['size'] = 'CHAR'
         elif type == 'REAL':
             self.res_dic[self.pc][3] += 'float'
             self.ST[self.res_dic[self.pc][0][1:]] = ('REAL')
