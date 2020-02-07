@@ -1,13 +1,17 @@
-function()    main() :integer
-()begin
 
-"this is a string"
-end
-if expr then
-'r'
 
+function main() : integer
 begin
-end
-else
-begin
-end
+    
+
+    index : integer;
+    index := 4;
+    while index < 10 do 
+    begin
+        index := index + 1;
+    end;
+
+    
+
+    return 0 ;
+end 

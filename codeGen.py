@@ -29,6 +29,7 @@ class CodeGenerator:
                 self.ST[temp_var] = self.make_stdscp(temp_var, 'temp', 'INT')
                 self.SS.append(temp_var)
             #TODO
+            self.pc += 1
         else:
             print('error :', token.value,'not declared')
 
@@ -67,13 +68,26 @@ class CodeGenerator:
         # self.SS.pop()
 
     def push_const(self, token):
+        var_ptr = self.get_temp()
+        self.res_dic[self.pc] = ['%'+var_ptr, '= alloca', '']
+        self.res_dic[self.pc + 1] = ['store ', '', ', ']
         var_name = self.get_temp()
+        self.res_dic[self.pc + 2] = ['%'+var_name, '= load ', ', ']
+        if token.type == 'INT':
+            self.res_dic[self.pc][2] += 'i32'
+            self.res_dic[self.pc + 1][1] += 'i32 '
+            self.res_dic[self.pc + 1][1] += token.value
+            self.res_dic[self.pc + 1][2] += 'i32* %'+var_ptr
+            self.res_dic[self.pc + 2][1] += 'i32'
+            self.res_dic[self.pc + 2][2] += 'i32* %' + var_ptr
+            # TODO:
         if token.type == 'STRING':
             st_row = self.make_stdscp(token.value, 'im', token.type, len(token.value))
         else:
             st_row = self.make_stdscp(token.value, 'im', token.type)
         self.ST[var_name] = st_row
         self.SS.append(var_name)
+        self.pc += 3
 
     def check_type(self, op1, op2):
         st1 = self.ST[op1]
@@ -161,11 +175,11 @@ class CodeGenerator:
     def add(self, token):
         second_op_token = self.SS.pop()
         first_op_token = self.SS.pop()
-        self.res_dic[self.pc] = ['%', '=', '', '', '']
+        self.res_dic[self.pc] = ['%', '=', '', '%', '%']
         type = self.check_type(first_op_token, second_op_token)
         if type == 'INT':
             self.res_dic[self.pc][2] = 'add i32'
-            self.res_dic[self.pc][3] += first_op_token + ', '
+            self.res_dic[self.pc][3] += first_op_token + ','
             self.res_dic[self.pc][4] += second_op_token
         elif type == 'FLOAT':
             self.res_dic[self.pc][2] = 'fadd float'
