@@ -405,16 +405,74 @@ class CodeGenerator:
 
     # negate
     def negate(self, token):
-        first_op_token = self.SS.pop()
-        self.res_dic[self.pc] = ['%', '=', '', '%', '%']
+        op_token = self.SS.pop()
+        type = self.ST[op_token]['size']
+        self.res_dic[self.pc] = ['%', '=', '', '', '%']
         if type == 'INT':
             self.res_dic[self.pc][2] = 'sub i32'
             self.res_dic[self.pc][3] += '0,'
-            self.res_dic[self.pc][4] += first_op_token
+            self.res_dic[self.pc][4] += op_token
         elif type == 'FLOAT':
             self.res_dic[self.pc][2] = 'fsub float'
             self.res_dic[self.pc][3] += '0,'
-            self.res_dic[self.pc][4] += first_op_token
+            self.res_dic[self.pc][4] += op_token
+        else:
+            # TODO: other types
+            pass
+        temp = self.get_temp()
+        self.ST[temp] = self.make_stdscp(None, 'temp', type)
+        self.res_dic[self.pc][0] += temp
+        self.SS.append(temp)
+        self.pc += 1
+
+    # ---- 1-bit operations ---
+    # not command
+    def bitnot(self, token):
+        op_token = self.SS.pop()
+        type = self.ST[op_token]['size']
+        self.res_dic[self.pc] = ['%', '=', '', '%']
+        if type == 'BOOL':
+            self.res_dic[self.pc][2] = 'xor i1'
+            self.res_dic[self.pc][3] += op_token
+            self.res_dic[self.pc][3] += ', 1'
+        else:
+            # TODO: other types
+            pass
+        temp = self.get_temp()
+        self.ST[temp] = self.make_stdscp(None, 'temp', type)
+        self.res_dic[self.pc][0] += temp
+        self.SS.append(temp)
+        self.pc += 1
+
+    #logical and
+    def logical_and(self, token):
+        second_op_token = self.SS.pop()
+        first_op_token = self.SS.pop()
+        self.res_dic[self.pc] = ['%', '=', '', '%', '%']
+        type = self.check_type(first_op_token, second_op_token)
+        if type == 'BOOL':
+            self.res_dic[self.pc][2] = 'and i1'
+            self.res_dic[self.pc][3] += first_op_token + ','
+            self.res_dic[self.pc][4] += second_op_token
+        else:
+            # TODO: other types
+            pass
+        temp = self.get_temp()
+        self.ST[temp] = self.make_stdscp(None, 'temp', type)
+        self.res_dic[self.pc][0] += temp
+        self.SS.append(temp)
+        self.pc += 1
+
+    #logical or
+    def logical_or(self, token):
+        second_op_token = self.SS.pop()
+        first_op_token = self.SS.pop()
+        self.res_dic[self.pc] = ['%', '=', '', '%', '%']
+        type = self.check_type(first_op_token, second_op_token)
+        if type == 'BOOL':
+            self.res_dic[self.pc][2] = 'or i1'
+            self.res_dic[self.pc][3] += first_op_token + ','
+            self.res_dic[self.pc][4] += second_op_token
         else:
             # TODO: other types
             pass
@@ -425,7 +483,7 @@ class CodeGenerator:
         self.pc += 1
 
 
-# ----Comparing Commands
+# ---- Comparing Commands ---
 
     def les(self, token):
         print("les stack: ", self.SS)
