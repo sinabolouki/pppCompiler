@@ -1,8 +1,8 @@
 class CodeGenerator:
-    def __init__(self, PS, SS, ST, res_dic):
+    def __init__(self, SS, ST, res_dic):
         self.ST = ST
-        self.PS = PS
         self.SS = SS
+        print("SS: ", self.SS)
         self.res_dic = res_dic
         self.pc = 0
         self.temp_num = 1
@@ -21,7 +21,7 @@ class CodeGenerator:
         return label
 
     def push_id(self, token):
-        self.SS.apped(token)
+        self.SS.append(token)
 
     def make_sdcp(self):
         pass

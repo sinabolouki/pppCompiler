@@ -6,6 +6,7 @@ AND = 'AND'
 ADD = 'ADD'
 ARRAY = 'ARRAY'
 ASSIGN = 'ASSIGN'
+ASEQ = 'ASEQ'
 BAND = 'BAND'
 BREAK = 'BREAK'
 BEGIN = 'BEGIN'
@@ -25,15 +26,15 @@ EOF = 'EOF'
 FUNCTION = 'FUNCTION'
 FALSE = 'FALSE'
 LBRA = 'LBRA'
-LES = 'LESS'
-LEQ = 'LESEQ'
+LES = 'LES'
+LEQ = 'LEQ'
 MULTIPLY = 'MULTIPLY'
 NEQ = 'NEQ'
 INT = 'INT'
 REA = 'REA'
 OR = 'OR'
-GRE = 'GREAT'
-GEQ = 'GREQ'
+GRE = 'GRE'
+GEQ = 'GEQ'
 LNOT = 'LNOT'
 MOD = 'MOD'
 PROCEDURE = 'PROCEDURE'
@@ -58,6 +59,7 @@ WHITESPACE = 'WHITESPACE'
 regex_es = [
     (ADD, '^[+]$'),
     (AND, '^and$'),
+    (ASEQ, '^(:=)$'),
     (ARRAY, '^array$'),
     (ASSIGN, '^assign$'),
     (BAND, '^[&]$'),
@@ -132,7 +134,6 @@ class Scanner:
 
         token_text = ""
         token = Token()
-        print(self.pointer)
         while re.match('\n|\t|\f|\r|\v|\s', self.text_enum[self.pointer]):
             self.pointer += 1
 

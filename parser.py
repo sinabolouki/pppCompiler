@@ -1,40 +1,60 @@
-import scanner
+import scanner as sc
 import codeGen
 import csv
 
 file = open('sampleText.txt')
 
-scanner = scanner.Scanner(file)
-parse_table_reader = csv.DictReader(open('parseTable.csv', 'r'), delimiter = ',')
+scanner = sc.Scanner(file)
+parse_table_reader = csv.DictReader(open('feb71019.csv', 'r'), delimiter = ',')
 parse_table_list = []
 for row in parse_table_reader:
     parse_table_list.append(row)
 state = 0
 token = scanner.parseToken()
-parse_stack = []
-codeGen = codeGen.CodeGenerator()
+PS = []
+ST = {}
+SS = [sc.Token('ID', 'index'), sc.Token('ID', 'index')]
+print(SS)
+res_dic = {}
+codeGen = codeGen.CodeGenerator(SS, ST, res_dic)
 
 
 def generate_code(func_name):
     if func_name == 'NoSem':
         return
-    getattr(codeGen, func_name)(token)
+    getattr(codeGen, func_name[1:])(token)
 
 
 while token.type != 'EOF':
+    print(token.type, token.value)
     table_cell = parse_table_list[state][token.type]
     tc_splitted = table_cell.split()
     if tc_splitted[0] == 'REDUCE':
-        next_state = parse_stack.pop()
-        state = next_state
+        state = PS.pop()
+        # print('reduce: ', tc_splitted)
+        graph_name = tc_splitted[1]
+        goto = parse_table_list[state][graph_name]
+        tc_splitted = goto.split()
+        if tc_splitted[0] == 'GOTO':
+            print(tc_splitted)
+            state = int("".join(list(tc_splitted[1])[1:]))
+            generate_code(tc_splitted[2])
+        else:
+            print('ERROR in reduce')
+
     elif tc_splitted[0] == 'PUSH_GOTO':
-        parse_stack.append(state)
-        next_state = int(str(list(tc_splitted[1])[1:]))
+        PS.append(state)
+        print(tc_splitted)
+        state = int("".join(list(tc_splitted[1])[1:]))
         generate_code(tc_splitted[2])
     elif tc_splitted[0] == 'SHIFT':
-        next_state = int(str(list(tc_splitted[1])[1:]))
+        state = int("".join(list(tc_splitted[1])[1:]))
         generate_code(tc_splitted[2])
         token = scanner.parseToken()
     else:
+        print(state)
+        print(tc_splitted)
         print('errror in line filan')
         break
+
+print(res_dic)
