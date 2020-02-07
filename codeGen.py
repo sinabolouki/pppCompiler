@@ -14,51 +14,61 @@ class CodeGenerator:
         self.temp_num += 1
         return temp
 
-    def get_label(self):
-        label = 'label'
-        label += str(self.lab_num)
-        self.lab_num += 1
-        return label
 
     def push_id(self, token):
         self.SS.append(token)
 
-    def make_sdcp(self):
-        pass
+    def make_stdscp(self, value,type, size, string_size=None):
+        dscp = {}
+        dscp['value'] = value
+        dscp['type'] = type
+        dscp['size'] = size
+        if size == 'STRING':
+            dscp['string_size'] = string_size
+        return dscp
+
+    def push_const(self, token):
+        var_name = self.get_temp()
+        if token.type == 'STRING':
+            st_row = self.make_stdscp(token.value, 'im', token.type, len(token.value))
+        else:
+            st_row = self.make_stdscp(token.value, 'im', token.type)
+        self.ST[var_name] = st_row
+        self.SS.append(var_name)
 
     def check_type(self, op1, op2):
-        type1 = self.ST[op1]
-        type2 = self.ST[op2]
-        if type1 == type2:
-            return type1
+        st1 = self.ST[op1]
+        st2 = self.ST[op2]
+        if st1['size'] == st2['size']:
+            return st1['size']
         else:
             # error
             pass
 
     def start_branch_if(self, token):
         var = self.SS.pop()
-        self.res_dic[self.pc] = ['br', 'i1', '%' + var + ',', 'label ', 'label ']
+        self.res_dic[self.pc] = ['br', 'i1', '%' + var + ',', 'label %', 'label %']
         self.pc += 1
-        true_label = self.get_label()
-        self.res_dic[self.pc] = [true_label + ": "]
+        true_label = self.get_temp()
+        self.res_dic[self.pc] = ["<label>: " + true_label + ": "]
         self.res_dic[self.pc - 1][3] += true_label
         self.SS.append(self.pc - 1)
 
     def start_loop(self, token):
-        loop_label = self.get_label()
-        self.res_dic[self.pc] = [loop_label + ": "]
+        loop_label = self.get_temp()
+        self.res_dic[self.pc] = ["<label>: " + loop_label + ": "]
         self.SS.append(loop_label)
         self.pc += 1
 
     def loop_first_comp(self, token):
         var = self.SS.pop()
-        self.res_dic[self.pc] = ['br', 'i1', '%' + var, ', label ', ', label ']
-        true_label = self.get_label()
-        false_label = self.get_label()
+        self.res_dic[self.pc] = ['br', 'i1', '%' + var, ', label %', ', label %']
+        true_label = self.get_temp()
+        false_label = self.get_temp()
         self.SS.append(false_label)
         self.res_dic[self.pc] += true_label
         self.pc += 1
-        self.res_dic[self.pc] = [true_label + ": "]
+        self.res_dic[self.pc] = ["<label>: " + true_label + ": "]
         self.res_dic[self.pc - 1][3] += true_label
         self.SS.append(self.pc - 1)
         self.pc += 1
@@ -66,9 +76,9 @@ class CodeGenerator:
     def comp_loop(self, token):
         loop_pc = self.SS.pop()
         false_label = self.SS.pop()
-        loop_label = self.get_label()
-        self.res_dic[self.pc + 1] = [false_label + ": "]
-        self.res_dic[self.pc] = ['br label ' + loop_label]
+        loop_label = self.get_temp()
+        self.res_dic[self.pc + 1] = ["<label>: "+false_label + ": "]
+        self.res_dic[self.pc] = ['br label %' + loop_label]
         self.res_dic[loop_pc][4] += false_label
         self.pc += 2
 
@@ -101,7 +111,7 @@ class CodeGenerator:
         if type == 'INTEGER':
             pass
 
-    def add_simple(self, token):
+    def add(self, token):
         second_op_token = self.SS.pop()
         first_op_token = self.SS.pop()
         self.res_dic[self.pc] = ['%', '=', '', '', '']
@@ -123,7 +133,7 @@ class CodeGenerator:
         self.res_dic[self.pc][0] += temp
         self.SS.append(temp)
 
-    def sub_simple(self, token):
+    def sub(self, token):
         second_op_token = self.SS.pop()
         first_op_token = self.SS.pop()
         self.res_dic[self.pc] = ['%', '=', '', '', '']
@@ -144,7 +154,7 @@ class CodeGenerator:
         self.res_dic[self.pc][0] += temp
         self.SS.append(temp)
 
-    def mul_simple(self, token):
+    def mul(self, token):
         second_op_token = self.SS.pop()
         first_op_token = self.SS.pop()
         self.res_dic[self.pc] = ['%', '=', '', '', '']
@@ -165,7 +175,7 @@ class CodeGenerator:
         self.res_dic[self.pc][0] += temp
         self.SS.append(temp)
 
-    def div_simple(self, token):
+    def div(self, token):
         second_op_token = self.SS.pop()
         first_op_token = self.SS.pop()
         self.res_dic[self.pc] = ['%', '=', '', '', '']
@@ -185,6 +195,17 @@ class CodeGenerator:
         self.ST[temp] = type
         self.res_dic[self.pc][0] += temp
         self.SS.append(temp)
+
+    def les(self, token):
+        first_op_token = self.SS.pop()
+        second_op_token = self.SS.pop()
+        print(first_op_token, second_op_token)
+        self.res_dic[self.pc] = ['%', '=', '', '', '']
+        type = self.check_type(first_op_token, second_op_token)
+        if type == 'INT':
+            self.res_dic[self.pc][2] = 'icmp  slt i1'
+            self.res_dic[self.pc][3] = '%' + first_op_token
+            self.res_dic[self.pc][4] = '%' + second_op_token
 
     def var_dcl_array(self, id):
         self.res_dic[self.pc] = []

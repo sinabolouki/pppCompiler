@@ -5,7 +5,7 @@ import csv
 file = open('sampleText.txt')
 
 scanner = sc.Scanner(file)
-parse_table_reader = csv.DictReader(open('feb71019.csv', 'r'), delimiter = ',')
+parse_table_reader = csv.DictReader(open('feb71137.csv', 'r'), delimiter = ',')
 parse_table_list = []
 for row in parse_table_reader:
     parse_table_list.append(row)
@@ -19,7 +19,7 @@ res_dic = {}
 codeGen = codeGen.CodeGenerator(SS, ST, res_dic)
 
 
-def generate_code(func_name):
+def generate_code(func_name, token):
     if func_name == 'NoSem':
         return
     getattr(codeGen, func_name[1:])(token)
@@ -38,7 +38,7 @@ while token.type != 'EOF':
         if tc_splitted[0] == 'GOTO':
             print(tc_splitted)
             state = int("".join(list(tc_splitted[1])[1:]))
-            generate_code(tc_splitted[2])
+            generate_code(tc_splitted[2], token)
         else:
             print('ERROR in reduce')
 
@@ -46,10 +46,10 @@ while token.type != 'EOF':
         PS.append(state)
         print(tc_splitted)
         state = int("".join(list(tc_splitted[1])[1:]))
-        generate_code(tc_splitted[2])
+        generate_code(tc_splitted[2], token)
     elif tc_splitted[0] == 'SHIFT':
         state = int("".join(list(tc_splitted[1])[1:]))
-        generate_code(tc_splitted[2])
+        generate_code(tc_splitted[2], token)
         token = scanner.parseToken()
     else:
         print(state)
