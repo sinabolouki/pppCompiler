@@ -403,6 +403,28 @@ class CodeGenerator:
         self.SS.append(temp)
         self.pc += 1
 
+    # negate
+    def negate(self, token):
+        first_op_token = self.SS.pop()
+        self.res_dic[self.pc] = ['%', '=', '', '%', '%']
+        if type == 'INT':
+            self.res_dic[self.pc][2] = 'sub i32'
+            self.res_dic[self.pc][3] += '0,'
+            self.res_dic[self.pc][4] += first_op_token
+        elif type == 'FLOAT':
+            self.res_dic[self.pc][2] = 'fsub float'
+            self.res_dic[self.pc][3] += '0,'
+            self.res_dic[self.pc][4] += first_op_token
+        else:
+            # TODO: other types
+            pass
+        temp = self.get_temp()
+        self.ST[temp] = self.make_stdscp(None, 'temp', type)
+        self.res_dic[self.pc][0] += temp
+        self.SS.append(temp)
+        self.pc += 1
+
+
 # ----Comparing Commands
 
     def les(self, token):
