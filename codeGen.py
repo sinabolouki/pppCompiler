@@ -325,6 +325,85 @@ class CodeGenerator:
         self.SS.append(temp)
         self.pc += 1
 
+    def rem(self, token):
+        second_op_token = self.SS.pop()
+        first_op_token = self.SS.pop()
+        self.res_dic[self.pc] = ['%', '=', '', '', '']
+        type = self.check_type(first_op_token, second_op_token)
+        if type == 'INT':
+            self.res_dic[self.pc][2] = 'srem i32'
+            self.res_dic[self.pc][3] += first_op_token + ', '
+            self.res_dic[self.pc][4] += second_op_token
+        elif type == 'FLOAT':
+            self.res_dic[self.pc][2] = 'frem float'
+            self.res_dic[self.pc][3] += first_op_token + ', '
+            self.res_dic[self.pc][4] += second_op_token
+        else:
+            # TODO: other types
+            pass
+        temp = self.get_temp()
+        self.ST[temp] = self.make_stdscp(None, 'temp', type)
+        self.res_dic[self.pc][0] += temp
+        self.SS.append(temp)
+        self.pc += 1
+
+# --- 2 operand bitwise commands
+
+    def bitwise_and(self, token):
+        second_op_token = self.SS.pop()
+        first_op_token = self.SS.pop()
+        self.res_dic[self.pc] = ['%', '=', '', '%', '%']
+        type = self.check_type(first_op_token, second_op_token)
+        if type == 'INT':
+            self.res_dic[self.pc][2] = 'and i32'
+            self.res_dic[self.pc][3] += first_op_token + ','
+            self.res_dic[self.pc][4] += second_op_token
+        else:
+            # TODO: other types
+            pass
+        temp = self.get_temp()
+        self.ST[temp] = self.make_stdscp(None, 'temp', type)
+        self.res_dic[self.pc][0] += temp
+        self.SS.append(temp)
+        self.pc += 1
+
+    def bitwise_or(self, token):
+        second_op_token = self.SS.pop()
+        first_op_token = self.SS.pop()
+        self.res_dic[self.pc] = ['%', '=', '', '%', '%']
+        type = self.check_type(first_op_token, second_op_token)
+        if type == 'INT':
+            self.res_dic[self.pc][2] = 'or i32'
+            self.res_dic[self.pc][3] += first_op_token + ','
+            self.res_dic[self.pc][4] += second_op_token
+        else:
+            # TODO: other types
+            pass
+        temp = self.get_temp()
+        self.ST[temp] = self.make_stdscp(None, 'temp', type)
+        self.res_dic[self.pc][0] += temp
+        self.SS.append(temp)
+        self.pc += 1
+
+    def bitwise_xor(self, token):
+        second_op_token = self.SS.pop()
+        first_op_token = self.SS.pop()
+        self.res_dic[self.pc] = ['%', '=', '', '%', '%']
+        type = self.check_type(first_op_token, second_op_token)
+        if type == 'INT':
+            self.res_dic[self.pc][2] = 'xor i32'
+            self.res_dic[self.pc][3] += first_op_token + ','
+            self.res_dic[self.pc][4] += second_op_token
+        else:
+            # TODO: other types
+            pass
+        temp = self.get_temp()
+        self.ST[temp] = self.make_stdscp(None, 'temp', type)
+        self.res_dic[self.pc][0] += temp
+        self.SS.append(temp)
+        self.pc += 1
+
+# ----Comparing Commands
 
     def les(self, token):
         print("les stack: ", self.SS)
