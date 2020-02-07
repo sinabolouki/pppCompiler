@@ -5,7 +5,7 @@ import csv
 file = open('sampleText.txt')
 
 scanner = sc.Scanner(file)
-parse_table_reader = csv.DictReader(open('feb71137.csv', 'r'), delimiter = ',')
+parse_table_reader = csv.DictReader(open('feb71634.csv', 'r'), delimiter = ',')
 parse_table_list = []
 for row in parse_table_reader:
     parse_table_list.append(row)
@@ -53,8 +53,14 @@ while token.type != 'EOF':
         token = scanner.parseToken()
     else:
         print(state)
+        print(token.type, token.value)
         print(tc_splitted)
         print('errror in line filan')
         break
 
-print(res_dic)
+res_text = ''
+for i in range(0, codeGen.pc):
+    res_text += " ".join(res_dic[i])
+    res_text += '\n'
+print(res_text)
+# print(res_dic)

@@ -15,22 +15,30 @@ class CodeGenerator:
         return temp
 
     def push_new_id(self, token):
-        self.ST[token.value] = {}
+        # self.ST[token.value] = {}
         self.SS.append(token.value)
 
     def push_id(self, token):
         if token.value in self.ST:
-            self.SS.append(token.value)
+            temp_var = self.get_temp()
+            # self.SS.append(token.value)
+            self.res_dic[self.pc] = ['%'+temp_var+'= load ' , '', ', ']
+            if self.ST[token.value]['size'] =='INT':
+                self.res_dic[self.pc][1] += 'i32'
+                self.res_dic[self.pc][2] += 'i32* %' + token.value
+                self.ST[temp_var] = self.make_stdscp(temp_var, 'temp', 'INT')
+                self.SS.append(temp_var)
+            #TODO
         else:
             print('error :', token.value,'not declared')
 
 
-    def assign_simple(selfs,token):
+    def assign_simple(self,token):
         var_name = self.SS.pop()
         res_name = self.SS[-1]
         type = check
 
-    def make_stdscp(self, value,type, size, string_size=None):
+    def make_stdscp(self, value, type, size, string_size=None):
         dscp = {}
         dscp['value'] = value
         dscp['type'] = type
@@ -38,6 +46,25 @@ class CodeGenerator:
         if size == 'STRING':
             dscp['string_size'] = string_size
         return dscp
+
+    def assign(self, token):
+        expr_res = self.SS.pop()
+        ass_var = self.SS.pop()
+        self.res_dic[self.pc] = ['store ', '', ', ']
+        print('vars: ', expr_res, ass_var)
+        print('ss: ',self.ST)
+        type = self.check_type(expr_res, ass_var)
+        if type == 'INT':
+            self.res_dic[self.pc][0] += 'i32'
+            self.res_dic[self.pc][2] += 'i32* '
+            self.res_dic[self.pc][1] += '%'+expr_res
+            self.res_dic[self.pc][2] += '%'+ass_var
+        #TODO: rest of types
+        self.pc += 1
+
+    def pop_id(self, token):
+        pass
+        # self.SS.pop()
 
     def push_const(self, token):
         var_name = self.get_temp()
@@ -65,6 +92,7 @@ class CodeGenerator:
         self.res_dic[self.pc] = ["<label>: " + true_label + ": "]
         self.res_dic[self.pc - 1][3] += true_label
         self.SS.append(self.pc - 1)
+        self.pc += 1
 
     def start_loop(self, token):
         loop_label = self.get_temp()
@@ -73,37 +101,41 @@ class CodeGenerator:
         self.pc += 1
 
     def loop_first_comp(self, token):
+        print("loop stack" , self.SS)
         var = self.SS.pop()
         self.res_dic[self.pc] = ['br', 'i1', '%' + var, ', label %', ', label %']
         true_label = self.get_temp()
         false_label = self.get_temp()
         self.SS.append(false_label)
-        self.res_dic[self.pc] += true_label
         self.pc += 1
         self.res_dic[self.pc] = ["<label>: " + true_label + ": "]
         self.res_dic[self.pc - 1][3] += true_label
-        self.SS.append(self.pc - 1)
+        self.res_dic[self.pc - 1][4] += false_label
         self.pc += 1
 
     def comp_loop(self, token):
-        loop_pc = self.SS.pop()
+        print("Stack: ", self.SS)
         false_label = self.SS.pop()
-        loop_label = self.get_temp()
+        loop_label = self.SS.pop()
         self.res_dic[self.pc + 1] = ["<label>: "+false_label + ": "]
         self.res_dic[self.pc] = ['br label %' + loop_label]
-        self.res_dic[loop_pc][4] += false_label
         self.pc += 2
 
+    def push_type(self, token):
+        self.SS.append(token.type)
+
     def var_dcl_simple(self, token):
+        type = self.SS.pop()
         id_token = self.SS[-1]
-        temp_pointer = self.get_temp()
-        self.res_dic[self.pc] = ['%'+temp_pointer, '=', 'alloca', '']
-        self.res_dic[self.pc + 1] = ['%' + id_token , '= load', '']
-        self.res_dic[self.pc][0] += id_token.value
-        type = token.type
+        self.res_dic[self.pc] = ['%', '=', 'alloca', '']
+        self.res_dic[self.pc][0] += id_token
+        print('type: ', type)
+        print(id_token)
         if type == 'INTEGER':
+            print('vared')
             self.res_dic[self.pc][3] += 'i32'
-            self.ST[id_token]['size'] = 'INT'
+            self.ST[id_token] = self.make_stdscp(None, 'var_ptr', 'INT')
+            print(self.ST)
         elif type == 'CHAR':
             self.res_dic[self.pc][3] += 'i8'
             self.St[id_token]['size'] = 'CHAR'
@@ -116,6 +148,7 @@ class CodeGenerator:
         elif type == 'STRING':
             self.res_dic[self.pc][3] = 'i64*'
             self.ST[self.res_dic[self.pc][0][1:]] = ('STRING')
+        self.pc += 1
 
     def var_dcl_array(self, token):
         id_token = self.SS.pop()
@@ -143,9 +176,10 @@ class CodeGenerator:
             pass
 
         temp = self.get_temp()
-        self.ST[temp] = type
+        self.ST[temp] = self.make_stdscp(None, 'temp', type)
         self.res_dic[self.pc][0] += temp
         self.SS.append(temp)
+        self.pc += 1
 
     def sub(self, token):
         second_op_token = self.SS.pop()
@@ -211,15 +245,22 @@ class CodeGenerator:
         self.SS.append(temp)
 
     def les(self, token):
+        print("les stack: ", self.SS)
         first_op_token = self.SS.pop()
         second_op_token = self.SS.pop()
         print(first_op_token, second_op_token)
+        print(self.res_dic)
+        temp_var = self.get_temp()
         self.res_dic[self.pc] = ['%', '=', '', '', '']
         type = self.check_type(first_op_token, second_op_token)
+        self.res_dic[self.pc][0] += temp_var
+        self.ST[temp_var] = self.make_stdscp(None, 'temp', 'BOOL')
         if type == 'INT':
-            self.res_dic[self.pc][2] = 'icmp  slt i1'
+            self.res_dic[self.pc][2] = 'icmp slt i1'
             self.res_dic[self.pc][3] = '%' + first_op_token
             self.res_dic[self.pc][4] = '%' + second_op_token
+        self.SS.append(temp_var)
+        self.pc += 1
 
     def var_dcl_array(self, id):
         self.res_dic[self.pc] = []
