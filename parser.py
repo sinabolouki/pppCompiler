@@ -5,7 +5,7 @@ import csv
 file = open('sampleText.txt')
 
 scanner = sc.Scanner(file)
-parse_table_reader = csv.DictReader(open('feb72317.csv', 'r'), delimiter = ',')
+parse_table_reader = csv.DictReader(open('feb72130.csv', 'r'), delimiter = ',')
 parse_table_list = []
 for row in parse_table_reader:
     parse_table_list.append(row)
@@ -25,8 +25,7 @@ def generate_code(func_name, token):
     getattr(codeGen, func_name[1:])(token)
 
 
-while True:
-    print('first: ',state)
+while token.type != 'EOF':
     # print(token.type, token.value)
     table_cell = parse_table_list[state][token.type]
     tc_splitted = table_cell.split()
@@ -37,7 +36,6 @@ while True:
         goto = parse_table_list[state][graph_name]
         tc_splitted = goto.split()
         if tc_splitted[0] == 'GOTO':
-            print('goto: ',state)
             # print(tc_splitted)
             state = int("".join(list(tc_splitted[1])[1:]))
             generate_code(tc_splitted[2], token)
@@ -53,9 +51,6 @@ while True:
         state = int("".join(list(tc_splitted[1])[1:]))
         generate_code(tc_splitted[2], token)
         token = scanner.parseToken()
-    elif tc_splitted[0] == 'ACCEPT':
-        print('parsing done!')
-        break
     else:
         print(state)
         print(token.type, token.value)
