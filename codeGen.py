@@ -12,11 +12,12 @@ class CodeGenerator:
         self.temp_num = 1
         self.lab_num = 0
         self.func_arg_count = 0
-        self.string_const = 3
+        self.string_const = 4
         self.res_dic[0] = ['@.str = private unnamed_addr constant [3 x i8] c"%d\\00", align 1\n']
         self.res_dic[0][0] += '@.str.1 = private unnamed_addr constant [3 x i8] c"%c\\00", align 1\n'
         self.res_dic[0][0] += '@.str.2 = private unnamed_addr constant [3 x i8] c"%s\\00", align 1\n'
         self.res_dic[0][0] += '@.str.3 = private unnamed_addr constant [3 x i8] c"%f\\00", align 1\n'
+        self.res_dic[0][0] += '@.str.4 = private unnamed_addr constant [4 x i8] c"%ld\00", align 1\n'
         self.res_dic[1] = ['declare i32 @scanf(i8*, ...)\n']
         self.res_dic[1][0] += 'declare i32 @printf(i8*, ...)'
         self.pc += 2
@@ -926,9 +927,15 @@ class CodeGenerator:
         if self.ST[var]['size'] == 'INT':
             self.res_dic[self.pc] = ['%'+temp, '= call i32 (i8*, ...) @printf(i8* getelementptr inbounds'
                             ' ([3 x i8], [3 x i8]* @.str, i32 0, i32 0), ', 'i32 %'+var + ')']
-        elif self.ST[var]['size'] == 'FLOAT':
+        elif self.ST[var]['size'] == 'REAL':
             self.res_dic[self.pc] = ['%' + temp, '= call i32 (i8*, ...) @printf(i8* getelementptr inbounds'
-                            ' ([3 x i8], [3 x i8]* @.str.2, i32 0, i32 0), ', 'float %' + var + ')']
+                            ' ([3 x i8], [3 x i8]* @.str.2, i32 0, i32 0), ', 'double %' + var + ')']
+        elif self.ST[var]['size'] == 'LONG':
+            self.res_dic[self.pc] = ['%'+temp, '= call i32 (i8*, ...) @printf(i8* getelementptr inbounds'
+                            ' ([4 x i8], [4 x i8]* @.str.4, i32 0, i32 0), ', 'i64 %'+var + ')']
+        elif self.ST[var]['size'] == 'CHAR':
+            self.res_dic[self.pc] = ['%' + temp, '= call i32 (i8*, ...) @printf(i8* getelementptr inbounds'
+                            ' ([3 x i8], [3 x i8]* @.str.1, i32 0, i32 0), ', 'i8 %' + var + ')']
         elif self.ST[var]['size'] == 'STRING':
             string = self.ST[var]['value']
             slash_count = 1
@@ -953,6 +960,15 @@ class CodeGenerator:
         elif self.ST[read_id]['size'] == 'CHAR':
             self.res_dic[self.pc][1] += '= call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]*' \
                                      ' @.str.1, i32 0, i32 0), i8* %' + read_id + ')'
+        elif self.ST[read_id]['size'] == 'LONG':
+            self.res_dic[self.pc][1] += '= call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]*' \
+                                     ' @.str.1, i32 0, i32 0), i64* %' + read_id + ')'
+        elif self.ST[read_id]['size'] == 'BOOL':
+            self.res_dic[self.pc][1] += '= call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]*' \
+                                     ' @.str.1, i32 0, i32 0), i1* %' + read_id + ')'
+        elif self.ST[read_id]['size'] == 'REAL':
+            self.res_dic[self.pc][1] += '= call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]*' \
+                                     ' @.str.1, i32 0, i32 0), i64* %' + read_id + ')'
         self.pc += 1
 
     #---if_codes
