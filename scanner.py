@@ -48,6 +48,9 @@ RETURN = 'RETURN'
 RPAR = 'RPAR'
 MINUS = 'MINUS'
 SEMICOLON = 'SEMICOLON'
+SINGLE_LINE_COMMENT = 'SINGLE_LINE_COMMENT'
+MULTI_LINE_COMMENT_START = 'MULTI_LINE_COMMENT_START'
+MULTI_LINE_COMMENT_END = 'MULTI_LINE_COMMENT_END'
 STRING = 'STRING'
 STR = 'STR'
 XOR = 'XOR'
@@ -95,6 +98,11 @@ regex_es = [
     (MINUS, '^[-]$'),
     (PROCEDURE, '^procedure$'),
     (RPAR, '^[)]$'),
+    (SINGLE_LINE_COMMENT, '^//$|^--$'),
+    (MULTI_LINE_COMMENT_START, '^<--$'),
+    ('MLC1', '^<-$'),
+    ('MLC2', '^--$'),
+    (MULTI_LINE_COMMENT_END, '^-->$'),
     (INTEGER, '^integer$'),
     (IF, '^if$'),
     (OF, '^of$'),
@@ -163,10 +171,36 @@ class Scanner:
 
         while not re.match('\n|\t|\f|\r|\v|\s', self.text_enum[self.pointer]):
             token_text += self.text_enum[self.pointer]
+            if re.match('^//$', token_text):
+                while self.text_enum[self.pointer] != '\n':
+                    self.pointer += 1
+                while re.match('\n|\t|\f|\r|\v|\s', self.text_enum[self.pointer]):
+                    self.pointer += 1
+                token = Token()
+                token_text = ''
+                continue
+            if re.match('^--$', token_text):
+                if self.text_enum[self.pointer + 1] != '>':
+                    while self.text_enum[self.pointer] != '\n':
+                        self.pointer += 1
+                    while re.match('\n|\t|\f|\r|\v|\s', self.text_enum[self.pointer]):
+                        self.pointer += 1
+                    token = Token()
+                    token_text = ''
+                    continue
+            if re.match('^<--$', token_text):
+                self.pointer += 1
+                com_token = self.parseToken()
+                while com_token.type != MULTI_LINE_COMMENT_END:
+                    com_token = self.parseToken()
+                while re.match('\n|\t|\f|\r|\v|\s', self.text_enum[self.pointer]):
+                    self.pointer += 1
+                token = Token()
+                token_text = ''
+                continue
             changed = False
             new_token_type = token.type
             new_token_values = token.value
-            # print("tokenText", token_text)
             i = 0
             for t in regex_es:
                 i +=1
@@ -177,6 +211,7 @@ class Scanner:
                     changed = True
                     break
             if not changed:
+
                 return token
             else:
                 token.type = new_token_type

@@ -2,7 +2,13 @@
 
 function main() : integer
 begin
-    
+
+    <-- multiline_comment
+
+
+   fea
+   -->
+    --comment
     i : integer;
     read(i);
     write(i);
@@ -11,7 +17,7 @@ begin
     begin
         index := index + 1;
     end;
-    write(index);
+    write(10);
 
     
 

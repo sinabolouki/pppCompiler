@@ -5,6 +5,7 @@ class CodeGenerator:
         print("SS: ", self.SS)
         self.res_dic = res_dic
         self.pc = 0
+        self.min_pc = 0
         self.temp_num = 1
         self.lab_num = 0
         self.func_arg_count = 0
