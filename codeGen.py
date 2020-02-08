@@ -187,8 +187,35 @@ class CodeGenerator:
             self.res_dic[self.pc + 1][2] += 'i32* %'+var_ptr
             self.res_dic[self.pc + 2][1] += 'i32'
             self.res_dic[self.pc + 2][2] += 'i32* %' + var_ptr
-            # TODO:
-        if token.type == 'STRING':
+        elif token.type == 'REAL':
+            self.res_dic[self.pc][2] += 'float'
+            self.res_dic[self.pc + 1][1] += 'float '
+            self.res_dic[self.pc + 1][1] += token.value
+            self.res_dic[self.pc + 1][2] += 'float* %'+var_ptr
+            self.res_dic[self.pc + 2][1] += 'float'
+            self.res_dic[self.pc + 2][2] += 'float* %' + var_ptr
+        elif token.type == 'CHAR':
+            self.res_dic[self.pc][2] += 'i8'
+            self.res_dic[self.pc + 1][1] += 'i8 '
+            self.res_dic[self.pc + 1][1] += token.value
+            self.res_dic[self.pc + 1][2] += 'i8* %'+var_ptr
+            self.res_dic[self.pc + 2][1] += 'i8'
+            self.res_dic[self.pc + 2][2] += 'i8* %' + var_ptr
+        elif token.type == 'LONG':
+            self.res_dic[self.pc][2] += 'i64'
+            self.res_dic[self.pc + 1][1] += 'i64 '
+            self.res_dic[self.pc + 1][1] += token.value
+            self.res_dic[self.pc + 1][2] += 'i64* %'+var_ptr
+            self.res_dic[self.pc + 2][1] += 'i64'
+            self.res_dic[self.pc + 2][2] += 'i64* %' + var_ptr
+        elif token.type == 'BOOL':
+            self.res_dic[self.pc][2] += 'i1'
+            self.res_dic[self.pc + 1][1] += 'i1 '
+            self.res_dic[self.pc + 1][1] += token.value
+            self.res_dic[self.pc + 1][2] += 'i1* %'+var_ptr
+            self.res_dic[self.pc + 2][1] += 'i1'
+            self.res_dic[self.pc + 2][2] += 'i1* %' + var_ptr
+        elif token.type == 'STRING':
             st_row = self.make_stdscp(token.value, 'im', token.type, len(token.value))
         else:
             st_row = self.make_stdscp(token.value, 'im', token.type)
