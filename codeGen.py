@@ -1,3 +1,6 @@
+import re
+
+
 class CodeGenerator:
     def __init__(self, SS, ST, res_dic):
         self.ST = ST
@@ -44,7 +47,6 @@ class CodeGenerator:
 
     def pop_var(self, token):
         self.SS.pop()
-
 
 
     def push_new_id(self, token):
@@ -136,9 +138,10 @@ class CodeGenerator:
     def push_const_string(self, token):
         const_name = self.get_string_temp()
         string = token.value
+        slash_count = 1
         strlen = len(string)
-        self.res_dic[0][0] += '@' + const_name + ' = private unnamed_addr constant ['+str(strlen + 1)+' x i8] c"'+string+'\\00", align 1\n'
-        self.ST[const_name] = self.make_stdscp(None, 'temp', 'STRING', strlen)
+        self.res_dic[0][0] += '@' + const_name + ' = private unnamed_addr constant ['+str(strlen  + slash_count)+' x i8] c"'+string+'\\00", align 1\n'
+        self.ST[const_name] = self.make_stdscp(string, 'temp', 'STRING', strlen)
         self.SS.append(const_name)
 
 
@@ -151,17 +154,6 @@ class CodeGenerator:
             # error
             pass
 
-    def start_branch_if(self, token):
-        var = self.SS.pop()
-        self.res_dic[self.pc] = ['br', 'i1', '%' + var + ',', 'label %', 'label %']
-        self.pc += 1
-        true_label = self.get_temp()
-        self.res_dic[self.pc] = ["<label>: " + true_label + ": "]
-        self.res_dic[self.pc - 1][3] += true_label
-        self.SS.append(self.pc - 1)
-        self.pc += 1
-
-
 
     # loop functions:
 
@@ -173,7 +165,6 @@ class CodeGenerator:
         self.pc += 2
 
     def loop_first_comp(self, token):
-        print("loop stack" , self.SS)
         var = self.SS.pop()
         self.res_dic[self.pc] = ['br', 'i1', '%' + var, ', label %', ', label %']
         true_label = self.get_temp()
@@ -290,7 +281,7 @@ class CodeGenerator:
     def sub(self, token):
         second_op_token = self.SS.pop()
         first_op_token = self.SS.pop()
-        self.res_dic[self.pc] = ['%', '=', '', '', '']
+        self.res_dic[self.pc] = ['%', '=', '', '%', '%']
         type = self.check_type(first_op_token, second_op_token)
         if type == 'INT':
             self.res_dic[self.pc][2] = 'sub i32'
@@ -566,12 +557,12 @@ class CodeGenerator:
         self.ST[temp_var] = self.make_stdscp(None, 'temp', 'BOOL')
         if type == 'INT':
             self.res_dic[self.pc][2] = 'icmp eq i32'
-            self.res_dic[self.pc][3] = '%' + first_op_token
-            self.res_dic[self.pc][4] = '%' + second_op_token
+            self.res_dic[self.pc][3] += '%' + first_op_token
+            self.res_dic[self.pc][4] += ', %' + second_op_token
         if type == 'FLOAT':
             self.res_dic[self.pc][2] = 'fcmp oeq'
-            self.res_dic[self.pc][3] = '%' + first_op_token
-            self.res_dic[self.pc][4] = '%' + second_op_token
+            self.res_dic[self.pc][3] += '%' + first_op_token
+            self.res_dic[self.pc][4] += ', %' + second_op_token
         self.SS.append(temp_var)
         self.pc += 1
 
@@ -585,12 +576,12 @@ class CodeGenerator:
         self.ST[temp_var] = self.make_stdscp(None, 'temp', 'BOOL')
         if type == 'INT':
             self.res_dic[self.pc][2] = 'icmp ne i32'
-            self.res_dic[self.pc][3] = '%' + first_op_token
-            self.res_dic[self.pc][4] = '%' + second_op_token
+            self.res_dic[self.pc][3] += '%' + first_op_token
+            self.res_dic[self.pc][4] += ', %' + second_op_token
         if type == 'FLOAT':
             self.res_dic[self.pc][2] = 'fcmp one'
-            self.res_dic[self.pc][3] = '%' + first_op_token
-            self.res_dic[self.pc][4] = '%' + second_op_token
+            self.res_dic[self.pc][3] += '%' + first_op_token
+            self.res_dic[self.pc][4] += ', %' + second_op_token
         self.SS.append(temp_var)
         self.pc += 1
 
@@ -604,12 +595,12 @@ class CodeGenerator:
         self.ST[temp_var] = self.make_stdscp(None, 'temp', 'BOOL')
         if type == 'INT':
             self.res_dic[self.pc][2] = 'icmp sle i32'
-            self.res_dic[self.pc][3] = '%' + first_op_token
-            self.res_dic[self.pc][4] = '%' + second_op_token
+            self.res_dic[self.pc][3] += '%' + first_op_token
+            self.res_dic[self.pc][4] += ', %' + second_op_token
         if type == 'FLOAT':
             self.res_dic[self.pc][2] = 'fcmp ole'
-            self.res_dic[self.pc][3] = '%' + first_op_token
-            self.res_dic[self.pc][4] = '%' + second_op_token
+            self.res_dic[self.pc][3] += '%' + first_op_token
+            self.res_dic[self.pc][4] += ', %' + second_op_token
         self.SS.append(temp_var)
         self.pc += 1
 
@@ -642,11 +633,19 @@ class CodeGenerator:
         dcsp['vars'] = []
         return dcsp
 
+    def add_arg(self,token):
+        pass
+
+    def push_func_id(self, token):
+        self.SS.append(token.value)
+
+
     def define_func(self, token):
         self.res_dic[self.pc] = ['define ', '@', '( ', ') {']
         func_name = token.value
         self.res_dic[self.pc][1] += func_name
         self.ST[func_name] = self.make_fdcsp()
+
 
     def set_type(self, token):
         function_name = self.res_dic[self.pc][1][1:]
@@ -714,9 +713,11 @@ class CodeGenerator:
             self.res_dic[self.pc] = ['%' + temp, '= call i32 (i8*, ...) @printf(i8* getelementptr inbounds'
                             ' ([3 x i8], [3 x i8]* @.str.2, i32 0, i32 0), ', 'float %' + var + ')']
         elif self.ST[var]['size'] == 'STRING':
+            string = self.ST[var]['value']
+            slash_count = 1
             self.res_dic[self.pc] = ['%' + temp, '= call i32 (i8*, ...) @printf(i8* getelementptr inbounds'
-                            ' (['+str(self.ST[var]['string_size'] + 1)+' x i8],'
-                                 ' ['+str(self.ST[var]['string_size'] + 1)+' x i8]* @'+var+', i32 0, i32 0))']
+                            ' (['+str(self.ST[var]['string_size'] + slash_count)+' x i8],'
+                                 ' ['+str(self.ST[var]['string_size'] + slash_count)+' x i8]* @'+var+', i32 0, i32 0))']
         else:
             pass
             #TODO
@@ -736,3 +737,35 @@ class CodeGenerator:
             self.res_dic[self.pc][1] += '= call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]*' \
                                      ' @.str.1, i32 0, i32 0), i8* %' + read_id + ')'
         self.pc += 1
+
+    #---if_codes
+    def start_branch_if(self, token):
+        var = self.SS.pop()
+        self.res_dic[self.pc] = ['br', 'i1', '%' + var, ', label %', ', label %']
+        true_label = self.get_temp()
+        self.SS.append(self.pc)
+        self.pc += 1
+        self.res_dic[self.pc] = [";<label>:" + true_label + ": "]
+        self.res_dic[self.pc - 1][3] += true_label
+        self.pc += 1
+
+    def end_if(self, token):
+        if_pc = self.SS.pop()
+        false_label = self.get_temp()
+        self.res_dic[self.pc ] = ['br label %'+false_label]
+        self.res_dic[self.pc + 1]  = [';<label>: ' + false_label + ": "]
+        self.res_dic[if_pc][4] += false_label
+        self.pc += 2
+
+    def start_else(self, token):
+        self.res_dic[self.pc - 2] = ['br label %']
+        self.SS.append(self.pc - 2)
+
+    def comp_else(self, token):
+        if_pc = self.SS.pop()
+        label_num = self.get_temp()
+        self.res_dic[self.pc] = ['br label %'+label_num]
+        self.res_dic[self.pc+1] = [';<label>: '+label_num+":"]
+        self.res_dic[if_pc][0] += label_num
+        self.pc+=2
+

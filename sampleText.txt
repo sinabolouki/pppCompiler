@@ -9,9 +9,21 @@ begin
    fea
    -->
     --comment
-    i : integer;
+    i : integer := 4;
+    j : integer := - i;
+    c : integer := 0;
+    read(c);
+    write(c);
+    if c = 0 then
+    begin
+        write("EQUAL!") ;
+        i := 2;
+    end else begin
+        write("not equal ! ");
+    end;
     read(i);
-    write(i);
+    write(j);
+    write("afa");
     index : integer := 4;
     while index < 10 do 
     begin

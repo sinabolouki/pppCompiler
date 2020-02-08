@@ -2,10 +2,10 @@ import scanner as sc
 import codeGen
 import csv
 
-file = open('Samples/s1.ppp')
+file = open('sampleText.txt')
 
 scanner = sc.Scanner(file)
-parse_table_reader = csv.DictReader(open('feb81455.csv', 'r'), delimiter = ',')
+parse_table_reader = csv.DictReader(open('feb81807.csv', 'r'), delimiter = ',')
 parse_table_list = []
 for row in parse_table_reader:
     parse_table_list.append(row)

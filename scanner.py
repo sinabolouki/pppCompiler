@@ -55,6 +55,7 @@ STRING = 'STRING'
 STR = 'STR'
 XOR = 'XOR'
 VAR = 'VAR'
+THEN = 'THEN'
 TRUE = 'TRUE'
 WHILE = 'WHILE'
 WRITE = 'WRITE'
@@ -79,7 +80,7 @@ regex_es = [
     (DIVIDE, '^[/]$'),
     (DO, '^do$'),
     (ELSE, '^else$'),
-    (EQ, '^(==)$'),
+    (EQ, '^(=)$'),
     (END, '^end$'),
     (EOF, '^[$]$'),
     (FALSE, '^false$'),
@@ -112,6 +113,7 @@ regex_es = [
     (REAL, '^real$'),
     (SEMICOLON, '^[;]$'),
     (STRING, '^string$'),
+    (THEN, '^then$'),
     (TRUE, '^true$'),
     (WHILE, '^while$'),
     (WHITESPACE, '\n|\t|\f|\r|\v|\s'),
