@@ -5,7 +5,7 @@ class CodeGenerator:
     def __init__(self, SS, ST, res_dic):
         self.ST = ST
         self.SS = SS
-        print("SS: ", self.SS)
+        #print("SS: ", self.SS)
         self.res_dic = res_dic
         self.pc = 0
         self.min_pc = 0
@@ -82,8 +82,8 @@ class CodeGenerator:
         expr_res = self.SS.pop()
         ass_var = self.SS[-1]
         self.res_dic[self.pc] = ['store ', '', ', ']
-        print('vars: ', expr_res, ass_var)
-        print('ss: ', self.ST)
+        #print('vars: ', expr_res, ass_var)
+        #print('ss: ', self.ST)
         type = self.check_type(expr_res, ass_var)
         if type == 'INT':
             self.res_dic[self.pc][0] += 'i32'
@@ -97,8 +97,8 @@ class CodeGenerator:
         expr_res = self.SS.pop()
         ass_var = self.SS.pop()
         self.res_dic[self.pc] = ['store ', '', ', ']
-        print('vars: ', expr_res, ass_var)
-        print('ss: ',self.ST)
+        #print('vars: ', expr_res, ass_var)
+        #print('ss: ',self.ST)
         type = self.check_type(expr_res, ass_var)
         if type == 'INT':
             self.res_dic[self.pc][0] += 'i32'
@@ -175,7 +175,7 @@ class CodeGenerator:
         self.pc += 1
 
     def comp_loop(self, token):
-        print("Stack: ", self.SS)
+        #print("Stack: ", self.SS)
         loop_pc = self.SS.pop()
         false_label = self.get_temp()
         loop_label = self.SS.pop()
@@ -226,13 +226,13 @@ class CodeGenerator:
         id_token = self.SS[-1]
         self.res_dic[self.pc] = ['%', '=', 'alloca', '']
         self.res_dic[self.pc][0] += id_token
-        print('type: ', type)
-        print(id_token)
+        #print('type: ', type)
+        #print(id_token)
         if type == 'INTEGER':
-            print('vared')
+            #print('vared')
             self.res_dic[self.pc][3] += 'i32'
             self.ST[id_token] = self.make_stdscp(None, 'var_ptr', 'INT')
-            print(self.ST)
+            #print(self.ST)
         elif type == 'CHAR':
             self.res_dic[self.pc][3] += 'i8'
             self.St[id_token]['size'] = 'CHAR'
@@ -507,11 +507,11 @@ class CodeGenerator:
 # ---- Comparing Commands ---
 
     def les(self, token):
-        print("les stack: ", self.SS)
+        #print("les stack: ", self.SS)
         first_op_token = self.SS.pop()
         second_op_token = self.SS.pop()
-        print(first_op_token, second_op_token)
-        print(self.res_dic)
+        #print(first_op_token, second_op_token)
+        #print(self.res_dic)
         temp_var = self.get_temp()
         self.res_dic[self.pc] = ['%', '=', '', '', ', ']
         type = self.check_type(first_op_token, second_op_token)

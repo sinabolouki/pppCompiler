@@ -1,8 +1,15 @@
+import argparse
 import scanner as sc
 import codeGen
 import csv
 
-file = open('sampleText.txt')
+arg_parser = argparse.ArgumentParser()
+arg_parser.add_argument("-p", "--path", default='sampleText.txt', help='path to your code')
+arg = vars(arg_parser.parse_args())
+input_path = arg['path']
+output_path = ".".join(input_path.split('.')[:-1])+'.ll'
+#print(output_path)
+file = open(input_path)
 
 scanner = sc.Scanner(file)
 parse_table_reader = csv.DictReader(open('feb81807.csv', 'r'), delimiter = ',')
@@ -13,8 +20,8 @@ state = 0
 token = scanner.parseToken()
 PS = []
 ST = {}
-SS = [sc.Token('ID', 'index'), sc.Token('ID', 'index')]
-print(SS)
+SS = []
+#print(SS)
 res_dic = {}
 codeGen = codeGen.CodeGenerator(SS, ST, res_dic)
 
@@ -26,7 +33,7 @@ def generate_code(func_name, token):
 
 
 while True:
-    print('first: ',state)
+    #print('first: ',state)
     # print(token.type, token.value)
     table_cell = parse_table_list[state][token.type]
     tc_splitted = table_cell.split()
@@ -37,7 +44,7 @@ while True:
         goto = parse_table_list[state][graph_name]
         tc_splitted = goto.split()
         if tc_splitted[0] == 'GOTO':
-            print('goto: ',state)
+            #print('goto: ',state)
             # print(tc_splitted)
             state = int("".join(list(tc_splitted[1])[1:]))
             generate_code(tc_splitted[2], token)
@@ -54,18 +61,20 @@ while True:
         generate_code(tc_splitted[2], token)
         token = scanner.parseToken()
     elif tc_splitted[0] == 'ACCEPT':
-        print('parsing done!')
+        #print('parsing done!')
         break
     else:
-        print(state)
-        print(token.type, token.value)
-        print(tc_splitted)
-        print('error in line filan')
+        #print(state)
+        #print(token.type, token.value)
+        #print(tc_splitted)
+        #print('error in line filan')
         break
 
 res_text = ''
 for i in range(0, codeGen.pc):
     res_text += " ".join(res_dic[i])
     res_text += '\n'
-print(res_text)
-print(codeGen.SS)
+# print(res_text)
+with open(output_path, 'w') as output:
+    output.write(res_text)
+# print(codeGen.SS)

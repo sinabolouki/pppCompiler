@@ -169,7 +169,8 @@ class Scanner:
             token.value = token_text
             return token
         if re.match('\n|\t|\f|\r|\v|\s', self.text_enum[self.pointer]):
-            print(True)
+            pass
+            #print(True)
 
         while not re.match('\n|\t|\f|\r|\v|\s', self.text_enum[self.pointer]):
             token_text += self.text_enum[self.pointer]
