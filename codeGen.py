@@ -240,6 +240,10 @@ class CodeGenerator:
         st2 = self.ST[op2]
         if st1['size'] == st2['size']:
             return st1['size']
+        elif st1['size'] == 'INT' and st2['size'] == 'REAL':
+            return 'first_to_double'
+        elif st1['size'] == 'REAL' and st2['size'] == 'INT':
+            return 'second_to_double'
         else:
             # error
             pass
@@ -349,6 +353,9 @@ class CodeGenerator:
         first_op_token = self.SS.pop()
         self.res_dic[self.pc] = ['%', '=', '', '%', '%']
         type = self.check_type(first_op_token, second_op_token)
+        temp = self.get_temp()
+        self.ST[temp] = self.make_stdscp(None, 'temp', type)
+        self.res_dic[self.pc][0] += temp
         if type == 'INT':
             self.res_dic[self.pc][2] = 'add i32'
             self.res_dic[self.pc][3] += first_op_token + ','
@@ -365,15 +372,24 @@ class CodeGenerator:
             self.res_dic[self.pc][2] = 'add i1'
             self.res_dic[self.pc][3] += first_op_token + ','
             self.res_dic[self.pc][4] += second_op_token
+        elif type == 'first_to_double':
+            string = self.res_dic[self.pc]
+            temp = self.get_temp()
+            self.res_dic[self.pc] = ['%', '= sitofp i32', '%', 'to double']
+            self.res_dic[self.pc][0] += temp
+            self.res_dic[self.pc][2] += first_op_token
+            self.pc += 1
+            self.res_dic[self.pc] = string
+            self.res_dic[self.pc][2] = 'fadd double'
+            self.res_dic[self.pc][3] += first_op_token + ', '
+            self.res_dic[self.pc][4] += second_op_token
+            # here is a sample of casting integer to double
         else:
             # TODO: other types
             pass
-
-        temp = self.get_temp()
-        self.ST[temp] = self.make_stdscp(None, 'temp', type)
-        self.res_dic[self.pc][0] += temp
         self.SS.append(temp)
         self.pc += 1
+
 
     def sub(self, token):
         second_op_token = self.SS.pop()
