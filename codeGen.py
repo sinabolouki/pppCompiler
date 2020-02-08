@@ -64,7 +64,28 @@ class CodeGenerator:
                     self.res_dic[self.pc][2] += 'i32* %' + token.value
                     self.ST[temp_var] = self.make_stdscp(temp_var, 'temp', 'INT')
                     self.SS.append(temp_var)
+                elif self.ST[token.value]['size'] =='REAL':
+                    self.res_dic[self.pc][1] += 'float'
+                    self.res_dic[self.pc][2] += 'float* %' + token.value
+                    self.ST[temp_var] = self.make_stdscp(temp_var, 'temp', 'REAL')
+                    self.SS.append(temp_var)
+                elif self.ST[token.value]['size'] =='LONG':
+                    self.res_dic[self.pc][1] += 'i64'
+                    self.res_dic[self.pc][2] += 'i64* %' + token.value
+                    self.ST[temp_var] = self.make_stdscp(temp_var, 'temp', 'LONG')
+                    self.SS.append(temp_var)
+                elif self.ST[token.value]['size'] =='BOOL':
+                    self.res_dic[self.pc][1] += 'i1'
+                    self.res_dic[self.pc][2] += 'i1* %' + token.value
+                    self.ST[temp_var] = self.make_stdscp(temp_var, 'temp', 'BOOL')
+                    self.SS.append(temp_var)
+                elif self.ST[token.value]['size'] =='CHAR':
+                    self.res_dic[self.pc][1] += 'i8'
+                    self.res_dic[self.pc][2] += 'i8* %' + token.value
+                    self.ST[temp_var] = self.make_stdscp(temp_var, 'temp', 'CHAR')
+                    self.SS.append(temp_var)
                 #TODO
+
                 self.pc += 1
             elif self.ST[token.value]['type'] == 'func':
                 self.SS.append(token.value)
@@ -226,25 +247,24 @@ class CodeGenerator:
         id_token = self.SS[-1]
         self.res_dic[self.pc] = ['%', '=', 'alloca', '']
         self.res_dic[self.pc][0] += id_token
-        #print('type: ', type)
-        #print(id_token)
         if type == 'INTEGER':
-            #print('vared')
             self.res_dic[self.pc][3] += 'i32'
             self.ST[id_token] = self.make_stdscp(None, 'var_ptr', 'INT')
-            #print(self.ST)
+        elif type == 'LONG':
+            self.res_dic[self.pc][3] += 'i64'
+            self.ST[id_token] = self.make_stdscp(None, 'var_ptr', 'LONG')
         elif type == 'CHAR':
             self.res_dic[self.pc][3] += 'i8'
-            self.St[id_token]['size'] = 'CHAR'
+            self.ST[id_token] = self.make_stdscp(None, 'var_ptr', 'CHAR')
         elif type == 'REAL':
             self.res_dic[self.pc][3] += 'float'
-            self.ST[self.res_dic[self.pc][0][1:]] = ('REAL')
+            self.ST[id_token] = self.make_stdscp(None, 'var_ptr', 'REAL')
         elif type == 'BOOLEAN':
             self.res_dic[self.pc][3] += 'i1'
-            self.ST[self.res_dic[self.pc][0][1:]] = ('BOOL')
+            self.ST[id_token] = self.make_stdscp(None, 'var_ptr', 'BOOL')
         elif type == 'STRING':
             self.res_dic[self.pc][3] = 'i64*'
-            self.ST[self.res_dic[self.pc][0][1:]] = ('STRING')
+            self.ST[id_token] = self.make_stdscp(None, 'var_ptr', 'STRING')
         self.pc += 1
 
     def var_dcl_array(self, token):
