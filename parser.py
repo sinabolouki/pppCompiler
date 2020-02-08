@@ -5,7 +5,7 @@ import csv
 file = open('sampleText.txt')
 
 scanner = sc.Scanner(file)
-parse_table_reader = csv.DictReader(open('feb72317.csv', 'r'), delimiter = ',')
+parse_table_reader = csv.DictReader(open('feb81039.csv', 'r'), delimiter = ',')
 parse_table_list = []
 for row in parse_table_reader:
     parse_table_list.append(row)

@@ -7,6 +7,19 @@ class CodeGenerator:
         self.pc = 0
         self.temp_num = 1
         self.lab_num = 0
+        self.func_arg_count = 0
+        self.res_dic[0] = ['@.str = private unnamed_addr constant [3 x i8] c"%d\00", align 1']
+        self.res_dic[1] = ['@.str.1 = private unnamed_addr constant [3 x i8] c"%c\00", align 1']
+        self.res_dic[2] = ['@.str.2 = private unnamed_addr constant [3 x i8] c"%s\00", align 1']
+        self.res_dic[3] = ['@.str.3 = private unnamed_addr constant [3 x i8] c"%f\00", align 1']
+        self.res_dic[4] = ['declare i32 @scanf(i8*, ...)']
+        self.res_dic[5] = ['declare i32 @printf(i8*, ...)']
+        self.pc += 6
+
+    def add_printf_scanf(self):
+        printf_dscp = {'value':None, 'type':'func', 'size':'INT'}
+        scanf_dscp = {'value': None}
+        self.ST['write'] = printf_dscp
 
     def get_temp(self):
         temp = ''
@@ -36,16 +49,19 @@ class CodeGenerator:
 
     def push_id(self, token):
         if token.value in self.ST:
-            temp_var = self.get_temp()
-            # self.SS.append(token.value)
-            self.res_dic[self.pc] = ['%'+temp_var+'= load ' , '', ', ']
-            if self.ST[token.value]['size'] =='INT':
-                self.res_dic[self.pc][1] += 'i32'
-                self.res_dic[self.pc][2] += 'i32* %' + token.value
-                self.ST[temp_var] = self.make_stdscp(temp_var, 'temp', 'INT')
-                self.SS.append(temp_var)
-            #TODO
-            self.pc += 1
+            if self.ST[token.value]['type'] == 'var_ptr':
+                temp_var = self.get_temp()
+                # self.SS.append(token.value)
+                self.res_dic[self.pc] = ['%'+temp_var+'= load ' , '', ', ']
+                if self.ST[token.value]['size'] =='INT':
+                    self.res_dic[self.pc][1] += 'i32'
+                    self.res_dic[self.pc][2] += 'i32* %' + token.value
+                    self.ST[temp_var] = self.make_stdscp(temp_var, 'temp', 'INT')
+                    self.SS.append(temp_var)
+                #TODO
+                self.pc += 1
+            elif self.ST[token.value]['type'] == 'func':
+                self.SS.append(token.value)
         else:
             print('error :', token.value,'not declared')
 
@@ -339,12 +355,12 @@ class CodeGenerator:
         self.ST[temp_var] = self.make_stdscp(None, 'temp', 'BOOL')
         if type == 'INT':
             self.res_dic[self.pc][2] = 'icmp slt i32'
-            self.res_dic[self.pc][3] = '%' + first_op_token
-            self.res_dic[self.pc][4] = '%' + second_op_token
+            self.res_dic[self.pc][3] += '%' + first_op_token
+            self.res_dic[self.pc][4] += '%' + second_op_token
         if type == 'FLOAT':
             self.res_dic[self.pc][2] = 'fcmp olt'
-            self.res_dic[self.pc][3] = '%' + first_op_token
-            self.res_dic[self.pc][4] = '%' + second_op_token
+            self.res_dic[self.pc][3] += '%' + first_op_token
+            self.res_dic[self.pc][4] += '%' + second_op_token
         self.SS.append(temp_var)
         self.pc += 1
 
@@ -477,6 +493,69 @@ class CodeGenerator:
         self.pc += 1
 
     def end_func(self, token):
-        print('called')
         self.res_dic[self.pc] = ['}']
+        self.pc += 1
+
+    def func_call(self, token):
+        temp_var = self.get_temp()
+        self.res_dic[self.pc] = ['%' + temp_var, ' =', 'call', '',  '(', ') @', '(']
+        arg_size = [', '] * self.func_arg_count
+        arg_size[0] = ['']
+        args = [', '] * self.func_arg_count
+        args[0] = ['']
+        while self.func_arg_count >= 0:
+            arg = self.SS.pop()
+            self.func_arg_count -= 1
+            if self.ST[arg]['size'] == 'INT':
+                arg_size[self.func_arg_count] += 'i32'
+                args[self.func_arg_count] += 'i32 %' + arg
+            elif self.ST[arg]['size'] == 'FLOAT':
+                arg_size[self.func_arg_count] += 'float'
+                args[self.func_arg_count] += 'float %' + arg
+            else:
+                pass
+                # TODO
+        self.res_dic[self.pc][4] += "".join(arg_size)
+        self.res_dic[self.pc][6] += ''.join(args)
+        self.res_dic[self.pc][6] += ')'
+        func_name = self.SS.pop()
+        if self.ST[func_name]['size'] == 'INT':
+            self.res_dic[self.pc][3] = 'i32'
+            self.ST[temp_var] = self.make_stdscp(None, 'temp', 'INT')
+        elif self.ST[func_name]['size'] == 'FLOAT':
+            self.res_dic[self.pc][3] = 'float'
+            self.ST[temp_var] = self.make_stdscp(None, 'temp', 'REAL')
+        else:
+            pass
+            #TODO
+        self.res_dic[self.pc][5] += func_name
+        self.pc += 1
+
+    def write(self, token):
+        var = self.SS.pop()
+        temp = self.get_temp()
+        if self.ST[var]['size'] == 'INT':
+            self.res_dic[self.pc] = ['%'+temp, '= call i32 (i8*, ...) @printf(i8* getelementptr inbounds'
+                            ' ([3 x i8], [3 x i8]* @.str, i32 0, i32 0), ', 'i32 %'+var + ')']
+        elif self.ST[var]['size'] == 'FLOAT':
+            self.res_dic[self.pc] = ['%' + temp, '= call i32 (i8*, ...) @printf(i8* getelementptr inbounds'
+                            ' ([3 x i8], [3 x i8]* @.str.2, i32 0, i32 0), ', 'float %' + var + ')']
+        else:
+            pass
+            #TODO
+        self.pc += 1
+
+    def read_id(self, token):
+        self.SS.append(token.value)
+
+    def read(self, token):
+        read_id = self.SS.pop()
+        temp_var = self.get_temp()
+        self.res_dic[self.pc] = ['%'+temp_var, '']
+        if self.ST[read_id]['size'] == 'INT':
+            self.res_dic[self.pc][1] += '= call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]' \
+                                     '* @.str, i32 0, i32 0), i32* %' + read_id + ')'
+        elif self.ST[read_id]['size'] == 'CHAR':
+            self.res_dic[self.pc][1] += '= call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]*' \
+                                     ' @.str.1, i32 0, i32 0), i8* %' + read_id + ')'
         self.pc += 1

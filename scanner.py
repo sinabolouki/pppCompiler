@@ -42,6 +42,7 @@ IF = 'IF'
 INTEGER = 'INTEGER'
 OF = 'OF'
 RBRA = 'RBRA'
+READ = 'READ'
 REAL = 'REAL'
 RETURN = 'RETURN'
 RPAR = 'RPAR'
@@ -53,6 +54,7 @@ XOR = 'XOR'
 VAR = 'VAR'
 TRUE = 'TRUE'
 WHILE = 'WHILE'
+WRITE = 'WRITE'
 LPAR = 'LPAR'
 WHITESPACE = 'WHITESPACE'
 
@@ -97,6 +99,7 @@ regex_es = [
     (IF, '^if$'),
     (OF, '^of$'),
     (RBRA, '^[]]$'),
+    (READ, '^read$'),
     (RETURN, '^return$'),
     (REAL, '^real$'),
     (SEMICOLON, '^[;]$'),
@@ -104,6 +107,7 @@ regex_es = [
     (TRUE, '^true$'),
     (WHILE, '^while$'),
     (WHITESPACE, '\n|\t|\f|\r|\v|\s'),
+    (WRITE, '^write$'),
     (VAR, '^var$'),
     (XOR, '^[\^]$'),
     (ID, '^([a-zA-Z])\w*$'),
