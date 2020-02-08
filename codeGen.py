@@ -111,7 +111,27 @@ class CodeGenerator:
             self.res_dic[self.pc][2] += 'i32* '
             self.res_dic[self.pc][1] += '%' + expr_res
             self.res_dic[self.pc][2] += '%' + ass_var
-        # TODO: rest of types
+        elif type == 'REAL':
+            self.res_dic[self.pc][0] += 'float'
+            self.res_dic[self.pc][2] += 'float* '
+            self.res_dic[self.pc][1] += '%' + expr_res
+            self.res_dic[self.pc][2] += '%' + ass_var
+        elif type == 'LONG':
+            self.res_dic[self.pc][0] += 'i64'
+            self.res_dic[self.pc][2] += 'i64* '
+            self.res_dic[self.pc][1] += '%' + expr_res
+            self.res_dic[self.pc][2] += '%' + ass_var
+        elif type == 'CHAR':
+            self.res_dic[self.pc][0] += 'i8'
+            self.res_dic[self.pc][2] += 'i8* '
+            self.res_dic[self.pc][1] += '%' + expr_res
+            self.res_dic[self.pc][2] += '%' + ass_var
+        elif type == 'BOOL':
+            self.res_dic[self.pc][0] += 'i1'
+            self.res_dic[self.pc][2] += 'i1* '
+            self.res_dic[self.pc][1] += '%' + expr_res
+            self.res_dic[self.pc][2] += '%' + ass_var
+
         self.pc += 1
 
     def assign(self, token):
