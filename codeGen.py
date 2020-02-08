@@ -9,13 +9,14 @@ class CodeGenerator:
         self.temp_num = 1
         self.lab_num = 0
         self.func_arg_count = 0
-        self.res_dic[0] = ['@.str = private unnamed_addr constant [3 x i8] c"%d\00", align 1']
-        self.res_dic[1] = ['@.str.1 = private unnamed_addr constant [3 x i8] c"%c\00", align 1']
-        self.res_dic[2] = ['@.str.2 = private unnamed_addr constant [3 x i8] c"%s\00", align 1']
-        self.res_dic[3] = ['@.str.3 = private unnamed_addr constant [3 x i8] c"%f\00", align 1']
-        self.res_dic[4] = ['declare i32 @scanf(i8*, ...)']
-        self.res_dic[5] = ['declare i32 @printf(i8*, ...)']
-        self.pc += 6
+        self.string_const = 3
+        self.res_dic[0] = ['@.str = private unnamed_addr constant [3 x i8] c"%d\\00", align 1\n']
+        self.res_dic[0][0] += '@.str.1 = private unnamed_addr constant [3 x i8] c"%c\\00", align 1\n'
+        self.res_dic[0][0] += '@.str.2 = private unnamed_addr constant [3 x i8] c"%s\\00", align 1\n'
+        self.res_dic[0][0] += '@.str.3 = private unnamed_addr constant [3 x i8] c"%f\\00", align 1\n'
+        self.res_dic[1] = ['declare i32 @scanf(i8*, ...)\n']
+        self.res_dic[1][0] += 'declare i32 @printf(i8*, ...)'
+        self.pc += 2
 
     def add_printf_scanf(self):
         printf_dscp = {'value':None, 'type':'func', 'size':'INT'}
@@ -28,7 +29,9 @@ class CodeGenerator:
         self.temp_num += 1
         return temp
 
-
+    def get_string_temp(self):
+        self.string_const += 1
+        return '.str.'+str(self.string_const)
 
     def make_stdscp(self, value, type, size, string_size=None):
         dscp = {}
@@ -128,6 +131,16 @@ class CodeGenerator:
         self.ST[var_name] = st_row
         self.SS.append(var_name)
         self.pc += 3
+
+    # string handling
+    def push_const_string(self, token):
+        const_name = self.get_string_temp()
+        string = token.value
+        strlen = len(string)
+        self.res_dic[0][0] += '@' + const_name + ' = private unnamed_addr constant ['+str(strlen + 1)+' x i8] c"'+string+'\\00", align 1\n'
+        self.ST[const_name] = self.make_stdscp(None, 'temp', 'STRING', strlen)
+        self.SS.append(const_name)
+
 
     def check_type(self, op1, op2):
         st1 = self.ST[op1]
@@ -447,8 +460,8 @@ class CodeGenerator:
     def bitnot(self, token):
         op_token = self.SS.pop()
         type = self.ST[op_token]['size']
-        self.res_dic[self.pc] = ['%', '=', '', '%']
         if type == 'BOOL':
+            self.res_dic[self.pc] = ['%', '=', '', '%']
             self.res_dic[self.pc][2] = 'xor i1'
             self.res_dic[self.pc][3] += op_token
             self.res_dic[self.pc][3] += ', 1'
@@ -700,6 +713,10 @@ class CodeGenerator:
         elif self.ST[var]['size'] == 'FLOAT':
             self.res_dic[self.pc] = ['%' + temp, '= call i32 (i8*, ...) @printf(i8* getelementptr inbounds'
                             ' ([3 x i8], [3 x i8]* @.str.2, i32 0, i32 0), ', 'float %' + var + ')']
+        elif self.ST[var]['size'] == 'STRING':
+            self.res_dic[self.pc] = ['%' + temp, '= call i32 (i8*, ...) @printf(i8* getelementptr inbounds'
+                            ' (['+str(self.ST[var]['string_size'] + 1)+' x i8],'
+                                 ' ['+str(self.ST[var]['string_size'] + 1)+' x i8]* @'+var+', i32 0, i32 0))']
         else:
             pass
             #TODO

@@ -220,13 +220,3 @@ class Scanner:
                 break
             self.pointer += 1
         return token
-
-
-
-# scanner = Scanner(file)
-#
-# while True:
-#     token = scanner.parseToken()
-#     print(token.type, token.value)
-#     if token.type == EOF:
-#         break
