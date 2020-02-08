@@ -66,8 +66,8 @@ class CodeGenerator:
                     self.ST[temp_var] = self.make_stdscp(temp_var, 'temp', 'INT')
                     self.SS.append(temp_var)
                 elif self.ST[token.value]['size'] =='REAL':
-                    self.res_dic[self.pc][1] += 'float'
-                    self.res_dic[self.pc][2] += 'float* %' + token.value
+                    self.res_dic[self.pc][1] += 'double'
+                    self.res_dic[self.pc][2] += 'double* %' + token.value
                     self.ST[temp_var] = self.make_stdscp(temp_var, 'temp', 'REAL')
                     self.SS.append(temp_var)
                 elif self.ST[token.value]['size'] =='LONG':
@@ -113,8 +113,8 @@ class CodeGenerator:
             self.res_dic[self.pc][1] += '%' + expr_res
             self.res_dic[self.pc][2] += '%' + ass_var
         elif type == 'REAL':
-            self.res_dic[self.pc][0] += 'float'
-            self.res_dic[self.pc][2] += 'float* '
+            self.res_dic[self.pc][0] += 'double'
+            self.res_dic[self.pc][2] += 'double* '
             self.res_dic[self.pc][1] += '%' + expr_res
             self.res_dic[self.pc][2] += '%' + ass_var
         elif type == 'LONG':
@@ -148,8 +148,8 @@ class CodeGenerator:
             self.res_dic[self.pc][1] += '%'+expr_res
             self.res_dic[self.pc][2] += '%'+ass_var
         elif type == 'REAL':
-            self.res_dic[self.pc][0] += 'float'
-            self.res_dic[self.pc][2] += 'float* '
+            self.res_dic[self.pc][0] += 'double'
+            self.res_dic[self.pc][2] += 'double* '
             self.res_dic[self.pc][1] += '%'+expr_res
             self.res_dic[self.pc][2] += '%'+ass_var
         elif type == 'CHAR':
@@ -189,12 +189,12 @@ class CodeGenerator:
             self.res_dic[self.pc + 2][1] += 'i32'
             self.res_dic[self.pc + 2][2] += 'i32* %' + var_ptr
         elif token.type == 'REAL':
-            self.res_dic[self.pc][2] += 'float'
-            self.res_dic[self.pc + 1][1] += 'float '
+            self.res_dic[self.pc][2] += 'double'
+            self.res_dic[self.pc + 1][1] += 'double '
             self.res_dic[self.pc + 1][1] += token.value
-            self.res_dic[self.pc + 1][2] += 'float* %'+var_ptr
-            self.res_dic[self.pc + 2][1] += 'float'
-            self.res_dic[self.pc + 2][2] += 'float* %' + var_ptr
+            self.res_dic[self.pc + 1][2] += 'double* %'+var_ptr
+            self.res_dic[self.pc + 2][1] += 'double'
+            self.res_dic[self.pc + 2][2] += 'double* %' + var_ptr
         elif token.type == 'CHAR':
             self.res_dic[self.pc][2] += 'i8'
             self.res_dic[self.pc + 1][1] += 'i8 '
@@ -283,7 +283,7 @@ class CodeGenerator:
 
     def return_real(self,token):
         value = token.value
-        self.res_dic[self.pc] = ['ret float' + value]
+        self.res_dic[self.pc] = ['ret double' + value]
         self.pc += 1
 
     def return_id(self, token):
@@ -297,9 +297,9 @@ class CodeGenerator:
             self.res_dic[self.pc][2] += 'i32* %' + id_name
             self.res_dic[self.pc + 1][0] += 'i32 %' + temp_var
         elif self.ST[id_name]['size'] == 'REAL':
-            self.res_dic[self.pc][1] += 'float'
-            self.res_dic[self.pc][2] += 'float* %' + id_name
-            self.res_dic[self.pc + 1][0] += 'float %' + temp_var
+            self.res_dic[self.pc][1] += 'double'
+            self.res_dic[self.pc][2] += 'double* %' + id_name
+            self.res_dic[self.pc + 1][0] += 'double %' + temp_var
         else:
             pass
             #TODO
@@ -326,7 +326,7 @@ class CodeGenerator:
             self.res_dic[self.pc][3] += 'i8'
             self.ST[id_token] = self.make_stdscp(None, 'var_ptr', 'CHAR')
         elif type == 'REAL':
-            self.res_dic[self.pc][3] += 'float'
+            self.res_dic[self.pc][3] += 'double'
             self.ST[id_token] = self.make_stdscp(None, 'var_ptr', 'REAL')
         elif type == 'BOOLEAN':
             self.res_dic[self.pc][3] += 'i1'
@@ -354,7 +354,7 @@ class CodeGenerator:
             self.res_dic[self.pc][3] += first_op_token + ','
             self.res_dic[self.pc][4] += second_op_token
         elif type == 'REAL':
-            self.res_dic[self.pc][2] = 'fadd float'
+            self.res_dic[self.pc][2] = 'fadd double'
             self.res_dic[self.pc][3] += first_op_token + ', '
             self.res_dic[self.pc][4] += second_op_token
         elif type == 'LONG':
@@ -385,7 +385,7 @@ class CodeGenerator:
             self.res_dic[self.pc][3] += first_op_token + ', '
             self.res_dic[self.pc][4] += second_op_token
         elif type == 'REAL':
-            self.res_dic[self.pc][2] = 'fsub float'
+            self.res_dic[self.pc][2] = 'fsub double'
             self.res_dic[self.pc][3] += first_op_token + ', '
             self.res_dic[self.pc][4] += second_op_token
         elif type == 'LONG':
@@ -417,7 +417,7 @@ class CodeGenerator:
             self.res_dic[self.pc][3] += first_op_token + ', '
             self.res_dic[self.pc][4] += second_op_token
         elif type == 'REAL':
-            self.res_dic[self.pc][2] = 'fmul float'
+            self.res_dic[self.pc][2] = 'fmul double'
             self.res_dic[self.pc][3] += first_op_token + ', '
             self.res_dic[self.pc][4] += second_op_token
         elif type == 'LONG':
@@ -447,7 +447,7 @@ class CodeGenerator:
             self.res_dic[self.pc][3] += first_op_token + ', '
             self.res_dic[self.pc][4] += second_op_token
         elif type == 'REAL':
-            self.res_dic[self.pc][2] = 'fdiv float'
+            self.res_dic[self.pc][2] = 'fdiv double'
             self.res_dic[self.pc][3] += first_op_token + ', '
             self.res_dic[self.pc][4] += second_op_token
         elif type == 'LONG':
@@ -473,7 +473,7 @@ class CodeGenerator:
             self.res_dic[self.pc][3] += first_op_token + ', '
             self.res_dic[self.pc][4] += second_op_token
         elif type == 'REAL':
-            self.res_dic[self.pc][2] = 'frem float'
+            self.res_dic[self.pc][2] = 'frem double'
             self.res_dic[self.pc][3] += first_op_token + ', '
             self.res_dic[self.pc][4] += second_op_token
         elif type == 'LONG':
@@ -567,7 +567,7 @@ class CodeGenerator:
             self.res_dic[self.pc][3] += '0,'
             self.res_dic[self.pc][4] += op_token
         elif type == 'REAL':
-            self.res_dic[self.pc][2] = 'fsub float'
+            self.res_dic[self.pc][2] = 'fsub double'
             self.res_dic[self.pc][3] += '-0.0,'
             self.res_dic[self.pc][4] += op_token
         elif type == 'LONG':
@@ -659,7 +659,7 @@ class CodeGenerator:
             self.res_dic[self.pc][3] += '%' + first_op_token
             self.res_dic[self.pc][4] += '%' + second_op_token
         if type == 'REAL':
-            self.res_dic[self.pc][2] = 'fcmp olt float'
+            self.res_dic[self.pc][2] = 'fcmp olt double'
             self.res_dic[self.pc][3] += '%' + first_op_token
             self.res_dic[self.pc][4] += '%' + second_op_token
         if type == 'LONG':
@@ -687,7 +687,7 @@ class CodeGenerator:
             self.res_dic[self.pc][3] = '%' + first_op_token
             self.res_dic[self.pc][4] = '%' + second_op_token
         if type == 'REAL':
-            self.res_dic[self.pc][2] = 'fcmp ogt float'
+            self.res_dic[self.pc][2] = 'fcmp ogt double'
             self.res_dic[self.pc][3] = '%' + first_op_token
             self.res_dic[self.pc][4] = '%' + second_op_token
         if type == 'LONG':
@@ -715,7 +715,7 @@ class CodeGenerator:
             self.res_dic[self.pc][3] += '%' + first_op_token
             self.res_dic[self.pc][4] += ', %' + second_op_token
         if type == 'REAL':
-            self.res_dic[self.pc][2] = 'fcmp oeq float'
+            self.res_dic[self.pc][2] = 'fcmp oeq double'
             self.res_dic[self.pc][3] += '%' + first_op_token
             self.res_dic[self.pc][4] += ', %' + second_op_token
         if type == 'LONG':
@@ -747,7 +747,7 @@ class CodeGenerator:
             self.res_dic[self.pc][3] += '%' + first_op_token
             self.res_dic[self.pc][4] += ', %' + second_op_token
         if type == 'REAL':
-            self.res_dic[self.pc][2] = 'fcmp one float'
+            self.res_dic[self.pc][2] = 'fcmp one double'
             self.res_dic[self.pc][3] += '%' + first_op_token
             self.res_dic[self.pc][4] += ', %' + second_op_token
         if type == 'LONG':
@@ -779,7 +779,7 @@ class CodeGenerator:
             self.res_dic[self.pc][3] += '%' + first_op_token
             self.res_dic[self.pc][4] += ', %' + second_op_token
         if type == 'REAL':
-            self.res_dic[self.pc][2] = 'fcmp ole float'
+            self.res_dic[self.pc][2] = 'fcmp ole double'
             self.res_dic[self.pc][3] += '%' + first_op_token
             self.res_dic[self.pc][4] += ', %' + second_op_token
         if type == 'LONG':
@@ -807,7 +807,7 @@ class CodeGenerator:
             self.res_dic[self.pc][3] = '%' + first_op_token
             self.res_dic[self.pc][4] = '%' + second_op_token
         if type == 'REAL':
-            self.res_dic[self.pc][2] = 'fcmp oge float'
+            self.res_dic[self.pc][2] = 'fcmp oge double'
             self.res_dic[self.pc][3] = '%' + first_op_token
             self.res_dic[self.pc][4] = '%' + second_op_token
         if type == 'LONG':
@@ -857,7 +857,7 @@ class CodeGenerator:
             self.res_dic[self.pc][0] += 'i8'
             self.ST[function_name]['size'] = 'CHAR'
         elif type == 'REAL':
-            self.res_dic[self.pc][0] += 'float'
+            self.res_dic[self.pc][0] += 'double'
             self.ST[function_name]['size'] = 'REAL'
         elif type == 'BOOL':
             self.res_dic[self.pc][0] += 'i1'
@@ -888,8 +888,8 @@ class CodeGenerator:
                 arg_size[self.func_arg_count] += 'i32'
                 args[self.func_arg_count] += 'i32 %' + arg
             elif self.ST[arg]['size'] == 'REAL':
-                arg_size[self.func_arg_count] += 'float'
-                args[self.func_arg_count] += 'float %' + arg
+                arg_size[self.func_arg_count] += 'double'
+                args[self.func_arg_count] += 'double %' + arg
             elif self.ST[arg]['size'] == 'LONG':
                 arg_size[self.func_arg_count] += 'i64'
                 args[self.func_arg_count] += 'i64 %' + arg
@@ -910,7 +910,7 @@ class CodeGenerator:
             self.res_dic[self.pc][3] = 'i32'
             self.ST[temp_var] = self.make_stdscp(None, 'temp', 'INT')
         elif self.ST[func_name]['size'] == 'REAL':
-            self.res_dic[self.pc][3] = 'float'
+            self.res_dic[self.pc][3] = 'double'
             self.ST[temp_var] = self.make_stdscp(None, 'temp', 'REAL')
         elif self.ST[func_name]['size'] == 'LONG':
             self.res_dic[self.pc][3] = 'i64'
